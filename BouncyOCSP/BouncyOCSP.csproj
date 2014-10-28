@@ -50,6 +50,7 @@
     <Compile Include="BouncyOCSP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IToken.cs" />
+    <Compile Include="Response.cs" />
     <Compile Include="SoftToken.cs" />
   </ItemGroup>
   <ItemGroup>
