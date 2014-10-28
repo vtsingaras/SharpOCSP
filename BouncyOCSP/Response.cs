@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace BouncyOCSP
 {
-    class Program
+    class Response
     {
-        static void Main(string[] args)
-        {
-        }
+
     }
 }
