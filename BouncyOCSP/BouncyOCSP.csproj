@@ -53,8 +53,8 @@
     <Compile Include="IToken.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="SoftToken.cs" />
-    <Compile Include="Request.cs" />
     <Compile Include="HttpHandler.cs" />
+    <Compile Include="HelperDataTypes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

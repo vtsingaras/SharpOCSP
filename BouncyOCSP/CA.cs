@@ -28,20 +28,26 @@ namespace BouncyOCSP
         private DateTime caSerialsLastUpdate;
         private int caSerialsTimeout;
 		//TODO
-		public bool IsSerialRevoked(Asn1.Asn1OctetString serial)
+		public Org.BouncyCastle.X509.X509CrlEntry GetCrlEntry(Math.BigInteger serial)
 		{
-			return true;
+
+			return null;
 		}
         //TODO
         public bool SerialExists(Math.BigInteger serial)
         {
-            return true;
+			return false;
         }
         //TODO
         public void ReloadSerials()
         {
             return;
         }
+		//TODO
+		public void ReloadCrl()
+		{
+			return;
+		}
 		public override string ToString()
 		{
 			return caName.ToString ();
