@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Org.BouncyCastle;
 using Crypto = Org.BouncyCastle.Crypto;
+using X509	=	Org.BouncyCastle.X509;
 
 namespace BouncyOCSP
 {
@@ -21,5 +22,8 @@ namespace BouncyOCSP
         /// <param name="hashAlgorithm">The hashing algorithm, example Crypto.Digests.Sha1Digest</param>
         /// <returns>The digital signature.</returns>
         byte[] SignData(byte[] data, Crypto.IDigest hashAlgorithm);
+		Crypto.AsymmetricKeyParameter GetPublicKey ();
+		Crypto.AsymmetricKeyParameter GetPrivateKey ();
+		X509.X509Certificate	GetOcspSigningCert();
     }
 }

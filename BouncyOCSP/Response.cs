@@ -8,6 +8,9 @@ namespace BouncyOCSP
 {
     class Response
     {
+		Response()
+		{
 
+		}
     }
 }
