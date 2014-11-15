@@ -1,16 +1,19 @@
-﻿using Org.BouncyCastle;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Asn1 = Org.BouncyCastle.Asn1;
-using Math = Org.BouncyCastle.Math;
-using X509 = Org.BouncyCastle.X509;
-using Crypto = Org.BouncyCastle.Crypto;
-using Ocsp	=	Org.BouncyCastle.Ocsp;
-using OpenSsl = Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Ocsp;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.X509;
+using CrlException = Org.BouncyCastle.Security.Certificates.CrlException;
 
 namespace BouncyOCSP
 {
@@ -18,35 +21,71 @@ namespace BouncyOCSP
     {
         //Public
         public IToken caToken;
-		public string caCrlPath{ get; private set; }
-		public string caSerialsPath{ get; private set; }
-		public X509.X509Certificate caCertificate { get; private set; }
+		private string _caCrlPath;
+		private string _caSerialsPath;
+		public X509Certificate caCertificate { get; private set; }
 		public bool caCompromised { get; private set; }
         //Private
-		private Crypto.AsymmetricKeyParameter caKey;
-        private Asn1.X509.X509Name caName;
-        private DateTime caSerialsLastUpdate;
+		private Object _crlLock = new Object();
+		private Object _serialsLock = new Object();
+		private X509Crl	_crl;
+		private IList<BigInteger> _serials;
+		private X509CrlParser _crlReader;
+		private AsymmetricKeyParameter caKey;
+		private X509Name caName;
+		private DateTime _crlLastUpdate = DateTime.MinValue;
+		private DateTime _serialsLastUpdate = DateTime.MinValue;
 		//TODO
-		public Org.BouncyCastle.X509.X509CrlEntry GetCrlEntry(Math.BigInteger serial)
+		public Org.BouncyCastle.X509.X509CrlEntry GetCrlEntry(BigInteger serial)
 		{
-
-			return null;
+			//first time only
+			if (_crl == null) {
+				ReloadCrl ();
+			}
+			try{
+				if (_crl == null)
+					throw new OcspInternalMalfunctionException("CRLReloading error.");
+			}finally{}
+			return _crl.GetRevokedCertificate (serial);
 		}
         //TODO
-        public bool SerialExists(Math.BigInteger serial)
+        public bool SerialExists(BigInteger serial)
         {
-			if (serial.IntValue == 666)
-				return false;
-			return true;
+			return _serials.Contains (serial);
         }
-        //TODO
         public void ReloadSerials()
         {
+			if (Monitor.TryEnter(_serialsLock))
+			{
+				try
+				{
+					//TODO
+				}
+				finally
+				{
+					Monitor.Exit(_serialsLock);
+				}
+			}
             return;
         }
 		//TODO
 		public void ReloadCrl()
 		{
+			if (Monitor.TryEnter(_crlLock))
+			{
+				try{
+					using (var crl_stream = new FileStream (_caCrlPath, FileMode.Open)) {
+						_crl = _crlReader.ReadCrl (crl_stream);
+					}
+				}
+				catch (CrlException e){
+					Console.WriteLine ("Error reloading CRL:" + e.Message);
+					_crl = null;
+				}
+				finally{
+					Monitor.Exit(_crlLock);
+				}
+			}
 			return;
 		}
 		public override string ToString()
@@ -56,15 +95,17 @@ namespace BouncyOCSP
 		public CA(string name, string caCertPath, IToken token, string crlPath, string serialsPath, bool compromised = false)
         {
             //Read CA certificate 
-            var certReader = new OpenSsl.PemReader(new StreamReader(caCertPath));
-            caCertificate = (X509.X509Certificate)certReader.ReadObject();
+            var certReader = new PemReader(new StreamReader(caCertPath));
+            caCertificate = (X509Certificate)certReader.ReadObject();
             caName = caCertificate.SubjectDN;
             caKey = caCertificate.GetPublicKey();
-
+			//Init CRL
+			_crlReader = new X509CrlParser ();
+			//init token
             caToken = token;
             caCompromised = compromised;
             //TODO: Check if exists and access
-            caSerialsPath = serialsPath;
+            _caSerialsPath = serialsPath;
         }
     }
 }

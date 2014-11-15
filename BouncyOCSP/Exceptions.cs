@@ -34,4 +34,11 @@ namespace BouncyOCSP
 		public OcspMalformedRequestException(string message) : base(message) { }
 		public OcspMalformedRequestException(string message, Exception inner) : base(message, inner) { }
 	}
+	//Never catch this
+	public class OcspInternalMalfunctionException : Exception
+	{
+		public OcspInternalMalfunctionException() { }
+		public OcspInternalMalfunctionException(string message) : base(message) { }
+		public OcspInternalMalfunctionException(string message, Exception inner) : base(message, inner) { }
+	}
 }
