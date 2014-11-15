@@ -112,7 +112,7 @@ namespace BouncyOCSP
 			config = new Configuration("config.xml");
 			//String ca_name = config.getConfigValue("ca_name");
 			ca_list = new CA[1];
-			CA testCA = new CA ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
+			CA testCA = CA.CAGenerator ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
 				new SoftToken ("TestToken", "/home/vtsingaras/ocsp.AuthCentralCAR4.crt.pem", "/home/vtsingaras/ocsp.AuthCentralCAR4.key.pem"),"~/crl", "/home/vtsingaras/index.txt", false);
 			ca_list[0] = testCA;
 			//Listen for HTTP requests

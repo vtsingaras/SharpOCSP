@@ -10,7 +10,11 @@ namespace BouncyOCSP
     {
         public string getConfigValue(string key)
         {
-            throw new ConfigurationKeyValueReadException("Could not read requested key.");
+			try{
+				return config[key];
+			}catch (KeyNotFoundException e){
+				throw new ConfigurationKeyValueReadException ("Could not read requested key.", e);
+			}
         }
         public Configuration(string configFile)
         {
