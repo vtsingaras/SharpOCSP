@@ -22,4 +22,16 @@ namespace BouncyOCSP
         public ITokenSignDataException(string message) : base(message) { }
         public ITokenSignDataException(string message, Exception inner) : base(message, inner) { }
     }
+	public class OcspUnrecognizedIssuerException : Exception
+	{
+		public OcspUnrecognizedIssuerException() { }
+		public OcspUnrecognizedIssuerException(string message) : base(message) { }
+		public OcspUnrecognizedIssuerException(string message, Exception inner) : base(message, inner) { }
+	}
+	public class OcspMalformedRequestException : Exception
+	{
+		public OcspMalformedRequestException() { }
+		public OcspMalformedRequestException(string message) : base(message) { }
+		public OcspMalformedRequestException(string message, Exception inner) : base(message, inner) { }
+	}
 }

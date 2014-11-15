@@ -35,7 +35,7 @@ namespace BouncyOCSP
 		{
 			ThreadPool.QueueUserWorkItem((o) =>
 				{
-					Console.WriteLine("Webserver running...");
+					Console.WriteLine("HTTP handler running...");
 					try
 					{
 						while (_listener.IsListening)
@@ -43,22 +43,15 @@ namespace BouncyOCSP
 							ThreadPool.QueueUserWorkItem((c) =>
 								{
 									var ctx = c as HttpListenerContext;
-									try
-									{
-										byte[] buf = _responderMethod(ctx.Request);
-										ctx.Response.AppendHeader("Content-Type", "application/ocsp-response");
-										ctx.Response.ContentLength64 = buf.Length;
-										ctx.Response.OutputStream.Write(buf, 0, buf.Length);
-									}
-									catch { } // suppress any exceptions
-									finally
-									{
-										// always close the stream
-										ctx.Response.OutputStream.Close();
-									}
+									byte[] buf = _responderMethod(ctx.Request);
+									ctx.Response.AppendHeader("Content-Type", "application/ocsp-response");
+									ctx.Response.ContentLength64 = buf.Length;
+									ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+									ctx.Response.OutputStream.Close();
 								}, _listener.GetContext());
 						}
 					}
+					//TODO: implement proper exception handling
 					catch { } // suppress any exceptions
 				});
 		}

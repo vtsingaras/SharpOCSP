@@ -26,7 +26,6 @@ namespace BouncyOCSP
 		private Crypto.AsymmetricKeyParameter caKey;
         private Asn1.X509.X509Name caName;
         private DateTime caSerialsLastUpdate;
-        private int caSerialsTimeout;
 		//TODO
 		public Org.BouncyCastle.X509.X509CrlEntry GetCrlEntry(Math.BigInteger serial)
 		{
@@ -36,7 +35,9 @@ namespace BouncyOCSP
         //TODO
         public bool SerialExists(Math.BigInteger serial)
         {
-			return false;
+			if (serial.IntValue == 666)
+				return false;
+			return true;
         }
         //TODO
         public void ReloadSerials()
@@ -52,7 +53,7 @@ namespace BouncyOCSP
 		{
 			return caName.ToString ();
 		}
-		public CA(string name, string caCertPath, IToken token, string crlPath, string serialsPath, int serialsTimeout, bool compromised = false)
+		public CA(string name, string caCertPath, IToken token, string crlPath, string serialsPath, bool compromised = false)
         {
             //Read CA certificate 
             var certReader = new OpenSsl.PemReader(new StreamReader(caCertPath));
@@ -64,7 +65,6 @@ namespace BouncyOCSP
             caCompromised = compromised;
             //TODO: Check if exists and access
             caSerialsPath = serialsPath;
-			caSerialsTimeout = serialsTimeout;
         }
     }
 }
