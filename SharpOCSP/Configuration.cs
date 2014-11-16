@@ -12,15 +12,15 @@ namespace SharpOCSP
 {
     class Configuration
     {
+		private Dictionary<string, string> _config = new Dictionary<string, string>();
         public string getConfigValue(string key)
         {
 			try{
-				return ConfigurationManager.AppSettings[key];
+				return _config[key];
 			}catch (KeyNotFoundException){
 				return null;
 			}
         }
-		//TODO
         public Configuration(string configFile)
         {
 			XmlDocument doc = new XmlDocument();
@@ -31,7 +31,10 @@ namespace SharpOCSP
 			}
 			//build tokens
 			XmlNode	tokensNode = doc.SelectSingleNode ("//tokens");
-			XmlNodeList tokenNodeList = tokensNode.SelectNodes(".//token");
+			if (tokensNode == null) {
+				throw new ConfigurationException ("No tokens supplied!");
+			}
+			XmlNodeList tokenNodeList = tokensNode.SelectNodes("./token");
 			if (tokenNodeList.Count <= 0) {
 				throw new ConfigurationException ("No tokens supplied!");
 			}
@@ -52,7 +55,10 @@ namespace SharpOCSP
 			}
 			//build CAs
 			XmlNode calistNode = doc.SelectSingleNode ("//calist");
-			XmlNodeList caNodeList = calistNode.SelectNodes(".//ca");
+			if (calistNode == null) {
+				throw new ConfigurationException ("No CAs supplied!");
+			}
+			XmlNodeList caNodeList = calistNode.SelectNodes("./ca");
 			if (caNodeList.Count <= 0) {
 				throw new ConfigurationException ("No CAs supplied!");
 			}
@@ -70,14 +76,27 @@ namespace SharpOCSP
 						compromised = false;
 					}
 					SharpOCSP.ca_list.Add(CA.CreateCA(name, caCertPath, token, crl, index, compromised));
-				}/*catch (NullReferenceException e){
+				}catch (NullReferenceException e){
 					throw new ConfigurationException ("Unable to parse CA: " + ca_config ["name"].InnerText ?? "unknown", e);
-				}*/finally{}
+				}
 			}
 			//get interfaces
+			XmlNode uriprefixesNode = doc.SelectSingleNode ("//uriprefixes");
+			if (uriprefixesNode == null) {
+				throw new ConfigurationException ("No URIs supplied!");
+			}
+			XmlNodeList uriprefixNodeList = uriprefixesNode.SelectNodes("./uriprefix");
+			if (uriprefixNodeList.Count <= 0) {
+				throw new ConfigurationException ("No URIs to listen on supplied!");
+			}
+			foreach (XmlElement url in uriprefixNodeList) {
+				SharpOCSP.url_list.Add (url.InnerText);
+			}
 			//read rest settings
+			var extended_revoke = doc.SelectSingleNode ("//extendedrevoke");
+			//check if extendedrevoke is yes or no
+			_config.Add("extendedrevoke", 
+				( extended_revoke != null &&  (extended_revoke.InnerText == "yes" || extended_revoke.InnerText == "no")) ? extended_revoke.InnerText : null);
         }
-
-        private Dictionary<string, string> config;
     }
 }

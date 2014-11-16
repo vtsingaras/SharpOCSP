@@ -1,24 +1,75 @@
 ﻿using System;
 using System.Net;
-using SharpOCSP;
 using System.Collections.Generic;
-using System.Configuration;
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Asn1;
 using log4net;
 using log4netExtensions;
+using System.Threading;
+using Mono.Unix;
+using Mono.Unix.Native;
+using System.Diagnostics;
 
 namespace SharpOCSP
 {
 	static class SharpOCSP
     {
-		static ILog log;
+		public static ILog log;
+		public static List<string> url_list = new List<string> ();
 		public static List<CA> ca_list = new List<CA>();
 		public static List<IToken> token_list = new List<IToken>();
 		static Configuration config;
 		static HttpHandler http_handler;
+		//Signal handling on UNIX
+		private static void setupSignalHandlers()
+		{
+			Thread _thread = new Thread(new ThreadStart(signalHandlerThread));
+			_thread.Start();
+		}
 
+		private static void signalHandlerThread()
+		{
+			// signal handler thread
+			// repeatedly waits for incoming signals until masterExit
+
+			UnixSignal[] signals = new UnixSignal [] {
+				new UnixSignal (Signum.SIGUSR1),
+				new UnixSignal (Signum.SIGUSR2),
+			};
+
+			while (true) {
+				int index = UnixSignal.WaitAny (signals,-1);
+				Signum signal = signals [index].Signum;
+				signalHandler(signal);
+			};
+		}
+
+		private static void signalHandler(Signum signal)
+		{
+			switch (signal)
+			{
+			case Signum.SIGUSR1:
+				OnSerialsReload ();
+				break;
+			case Signum.SIGUSR2:
+				OnCrlReload ();
+				break;
+			}
+		}
+		//End signal handling
+		public static void OnSerialsReload()
+		{
+			foreach (CA ca in ca_list) {
+				ca.ReloadSerials ();
+			}
+		}
+		public static void OnCrlReload()
+		{
+			foreach (CA ca in ca_list) {
+				ca.ReloadCrl ();
+			}
+		}
 		public static CA GetIssuerForSingleRequest(Req single_req)
 		{
 			//select issuer
@@ -80,7 +131,7 @@ namespace SharpOCSP
 					} else {
 						if (issuer.SerialExists (cert_id.SerialNumber) == false) {
 							//return unknown, if config.rfc6960 is true the return extended revoke instead
-							if (config.getConfigValue ("rfc6960") == "true") {
+							if (config.getConfigValue ("extendedrevoke") == "yes") {
 								//extended revoke, 1 Jan 1970 and certificateHold
 								resp_generator.AddExtendedRevocationResponse (cert_id);
 								continue;
@@ -123,25 +174,26 @@ namespace SharpOCSP
 		}
         static void Main(string[] args)
         {
+			Console.WriteLine (Process.GetCurrentProcess ().Id);
+			setupSignalHandlers ();
 			try{
 				log = LogManager.GetLogger ("SharpOCSP");
 				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
 				//check if user supplied xml configuration path, else use current directory
+				//This will also initialize all CAs and tokens
 				if (args != null){
 					config = new Configuration(args[0]);
 				}else{
 					config  = new Configuration(Environment.CurrentDirectory + "sharpocsp.xml");
 				}
-				http_handler = new HttpHandler (SendOcspResponse, "http://127.0.0.1:8080/");
-				//config = new Configuration("config.xml");
-				//String ca_name = config.getConfigValue("ca_name");
-
-				token_list.Add(new SoftToken ("TestToken", "/home/vtsingaras/ocsp.AuthCentralCAR4.crt.pem", "/home/vtsingaras/ocsp.AuthCentralCAR4.key.pem"));
-				CA testCA = CA.CreateCA ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
-					"TestToken","/home/vtsingaras/AuthCentralCAR4.crl.pem", "/home/vtsingaras/AuthCentralCAR4.index.txt", false);
-				ca_list.Add(testCA);
+				try{
+					http_handler = new HttpHandler (SendOcspResponse, url_list.ToArray());
+				}catch (ArgumentException e){
+					throw new ConfigurationException("Verify URI prefixes", e);
+				}
 				//Listen for HTTP requests
 				http_handler.Run ();
+				//pause
 				Console.ReadKey ();
 			}catch (ConfigurationException e){
 				log.Error ("Configuration: " + e.Message);

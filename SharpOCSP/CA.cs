@@ -36,8 +36,9 @@ namespace SharpOCSP
 		private X509CrlParser _crlReader;
 		//ca specific
 		private string _name;
-		private DateTime _crlLastUpdate;
-		private DateTime _serialsLastUpdate;
+		//replace polling with Timers
+		//private DateTime _crlLastUpdate = DateTime.MinValue;
+		//private DateTime _serialsLastUpdate = DateTime.MinValue;
 
 		public X509CrlEntry GetCrlEntry(BigInteger serial)
 		{
@@ -65,6 +66,7 @@ namespace SharpOCSP
 			finally{
 				_crlLock.ExitWriteLock ();
 			}
+			SharpOCSP.log.Info ("CRL reloaded for CA: " + this);
 			return;
 		}
         public bool SerialExists(BigInteger serial)
@@ -107,6 +109,7 @@ namespace SharpOCSP
 			{
 				_serialsLock.ExitWriteLock ();
 			}
+			SharpOCSP.log.Info ("Serials reloaded for CA: " + this);
             return;
         }
 		public override string ToString()
@@ -133,10 +136,8 @@ namespace SharpOCSP
 			//Init CRLReader and serials
 			_crlReader = new X509CrlParser ();
 			_crlPath = crlPath;
-			_crlLastUpdate = DateTime.MinValue;
 			_serials = new List<BigInteger> ();
 			_serialsPath = serialsPath;
-			_serialsLastUpdate = DateTime.MinValue;
 			//Init token
             caToken = token;
             caCompromised = compromised;
