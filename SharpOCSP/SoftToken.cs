@@ -15,11 +15,7 @@ namespace SharpOCSP
 {
     class SoftToken : IToken
     {
-        public String Name
-        {
-            get;
-            private set;
-        }
+		public  override String Name{ get ; protected set; }
 		private X509Certificate _ocspCertificate;
 		private RsaPrivateCrtKeyParameters _privateKey;
         /// <summary>
@@ -28,7 +24,7 @@ namespace SharpOCSP
         /// <param name="name">The token's name.</param>
         /// <param name="certPath">Path to OCSP signer certificate.</param>
         /// <param name="keyPath">Path to OCSP signer certificate key.</param>
-		public byte[] SignData(byte[] data, IDigest digestAlgorithm)
+		public override byte[] SignData(byte[] data, IDigest digestAlgorithm)
 		{
 			byte[] signature;
 			RsaDigestSigner rsaSigner = new RsaDigestSigner(digestAlgorithm);
@@ -40,15 +36,15 @@ namespace SharpOCSP
 
 			return signature;
 		}
-		public AsymmetricKeyParameter GetPublicKey ()
+		public override AsymmetricKeyParameter GetPublicKey ()
 		{
 			return _ocspCertificate.GetPublicKey ();
 		}
-		public AsymmetricKeyParameter GetPrivateKey ()
+		public override AsymmetricKeyParameter GetPrivateKey ()
 		{
 			return  (AsymmetricKeyParameter)_privateKey;
 		}
-		public X509Certificate GetOcspSigningCert()
+		public override X509Certificate GetOcspSigningCert()
 		{
 			return _ocspCertificate;
 		}

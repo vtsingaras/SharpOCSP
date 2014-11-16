@@ -7,13 +7,12 @@
     <ProjectGuid>{CF6569B0-1913-44E8-BA38-6A1AC09D23C2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BouncyOCSP</RootNamespace>
-    <AssemblyName>BouncyOCSP</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>SharpOCSP</RootNamespace>
+    <AssemblyName>SharpOCSP</AssemblyName>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +22,7 @@
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Commandlineparameters>/home/vtsingaras/App.config</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -45,6 +45,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CA.cs" />
@@ -54,10 +58,10 @@
     <Compile Include="IToken.cs" />
     <Compile Include="SoftToken.cs" />
     <Compile Include="HttpHandler.cs" />
-    <Compile Include="Helpers.cs" />
-    <Compile Include="RequestUtilities.cs" />
     <Compile Include="BasicResponseGenerator.cs" />
     <Compile Include="SharpOCSP.cs" />
+    <Compile Include="Utilities.cs" />
+    <Compile Include="Logging.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

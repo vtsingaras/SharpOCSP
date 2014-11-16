@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Net;
+using SharpOCSP;
+using System.Configuration;
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Asn1;
+using log4net;
+using log4netExtensions;
 
 namespace SharpOCSP
 {
     class SharpOCSP
     {
+		static ILog log;
 		static CA[] ca_list;
 		static Configuration config;
-		public static CA GetIssuerForRequest(OcspReq ocsp_req)
+		static HttpHandler http_handler;
+
+		public static CA GetIssuerForSingleRequest(Req single_req)
 		{
-			//get first singleRequest
-			Req first_single_req = ocsp_req.GetRequestList () [0];
-			//check if request contains requests for different issuers(NOT SUPPORTED)
-			foreach ( Req single_req in ocsp_req.GetRequestList() )
-			{
-				if (RequestUtilities.IssuersMatch (single_req, first_single_req) == false)
-					throw new OcspMalformedRequestException ("Multiple issuers in request!");
-			}
-			//select issuer (same for all singleRequests so just use the first one)
-			CertificateID cert_id = first_single_req.GetCertID ();
+			//select issuer
+			CertificateID cert_id = single_req.GetCertID ();
 			foreach (CA issuer in ca_list)
 			{
 				if ( cert_id.MatchesIssuer(issuer.caCertificate))
@@ -30,25 +29,39 @@ namespace SharpOCSP
 			//Issuer not recognized
 			throw new OcspUnrecognizedIssuerException("Unrecognized CA in request.");
 		}
-
+		public static IToken GetTokenForRequest(OcspReq ocsp_req)
+		{
+			//get first singleRequest
+			Req first_single_req = ocsp_req.GetRequestList () [0];
+			IToken _token_a = GetIssuerForSingleRequest (first_single_req).caToken;
+			//check if request contains requests for different responders
+			foreach ( Req single_req in ocsp_req.GetRequestList() )
+			{
+				IToken _token_b = GetIssuerForSingleRequest(single_req).caToken;
+				if ( _token_a != _token_b)
+					throw new OcspMalformedRequestException ("Multiple responderIDs in request!");
+			}
+			return _token_a;
+		}
 		public static OcspResp CreateResponseForRequest (OcspReq ocsp_req)
 		{
 			try{
-				CertificateID cert_id;
-				CA issuer;
 				//validate ocsp_req
 				if (ocsp_req == null){
 					throw new OcspMalformedRequestException();
 				}
-				issuer = GetIssuerForRequest(ocsp_req);
-				BasicResponseGenerator resp_generator = new BasicResponseGenerator (issuer);
+				IToken token = GetTokenForRequest(ocsp_req);
+				BasicResponseGenerator resp_generator = new BasicResponseGenerator (token);
 				//append nonce
 				var nonce = ocsp_req.GetExtensionValue (new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.2"));
 				resp_generator.AppendNonce (nonce);
 				foreach (Req single_req in ocsp_req.GetRequestList())
 				{
+					CertificateID cert_id;
+					CA issuer;
+					issuer = GetIssuerForSingleRequest(single_req);
 					cert_id = single_req.GetCertID ();
-					Console.WriteLine ("Got request for serial: " + cert_id.SerialNumber.ToString() + " for CA: " + issuer.ToString());
+					log.Debug ("Got request for serial: " + cert_id.SerialNumber.ToString() + " for CA: " + issuer.ToString());
 					//check for ca compromise flag
 					if (issuer.caCompromised == true) {
 						//return revoked with reason cacompromised
@@ -84,10 +97,10 @@ namespace SharpOCSP
 				OCSPRespGenerator ocsp_resp_builder = new OCSPRespGenerator ();
 				return ocsp_resp_builder.Generate (OcspRespStatus.Successful, basic_ocsp_resp);
 			}catch (OcspMalformedRequestException e){
-				Console.WriteLine (e.Message);
+				log.Warn (e.Message);
 				return new OCSPRespGenerator ().Generate (OcspRespStatus.MalformedRequest, null);
 			}catch (OcspUnrecognizedIssuerException e){
-				Console.WriteLine (e.Message);
+				log.Warn (e.Message);
 				return new OCSPRespGenerator ().Generate (OcspRespStatus.Unauthorized, null);
 			}
 		}
@@ -99,10 +112,18 @@ namespace SharpOCSP
 		}
         static void Main(string[] args)
         {
-			HttpHandler http_handler = new HttpHandler (SendOcspResponse, "http://127.0.0.1:8080/");
 			try{
-				Console.WriteLine ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
-				config = new Configuration("config.xml");
+				//check if user supplied xml configuration path, else use current directory
+				if (args != null){
+					config = new Configuration(args[0]);
+				}else{
+					config  = new Configuration(Environment.CurrentDirectory);
+				}
+				Console.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
+				log = LogManager.GetLogger ("SharpOCSP");
+				http_handler = new HttpHandler (SendOcspResponse, "http://127.0.0.1:8080/");
+				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
+				//config = new Configuration("config.xml");
 				//String ca_name = config.getConfigValue("ca_name");
 				ca_list = new CA[1];
 				CA testCA = CA.CAFactoryMethod ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
@@ -112,11 +133,9 @@ namespace SharpOCSP
 				http_handler.Run ();
 				Console.ReadKey ();
 			}catch(OcspFilesystemException e){
-				Console.WriteLine ("FATAL: Filesystem.");
-				Console.WriteLine (e.InnerException.Message);
+				log.Error ("Filesystem.", e.InnerException);
 			}catch(OcspInternalMalfunctionException e){
-				Console.WriteLine ("The application encountered a serious error: " + e.Message);
-				Console.WriteLine ("Please send the following stacktrace.");
+				log.Error ("The application encountered a serious error: " + e.Message);
 				throw e.InnerException;
 			}
         }

@@ -9,21 +9,21 @@ using Org.BouncyCastle.X509;
 
 namespace SharpOCSP
 {
-    interface IToken
+	abstract class IToken
     {
         /// <summary>
         /// Gets the token name.
         /// </summary>
-        string Name { get; }
+		public virtual string Name { get; protected set;}
         /// <summary>
         /// This functions signs a block of data using the supplied hashing implementation.
         /// </summary>
         /// <param name="data">The data to be signed.</param>
         /// <param name="hashAlgorithm">The hashing algorithm, example Crypto.Digests.Sha1Digest</param>
         /// <returns>The digital signature.</returns>
-        byte[] SignData(byte[] data, IDigest hashAlgorithm);
-		AsymmetricKeyParameter GetPublicKey ();
-		AsymmetricKeyParameter GetPrivateKey ();
-		X509Certificate	GetOcspSigningCert();
+		abstract public byte[] SignData(byte[] data, IDigest hashAlgorithm);
+		abstract public AsymmetricKeyParameter GetPublicKey ();
+		abstract public AsymmetricKeyParameter GetPrivateKey ();
+		abstract public X509Certificate	GetOcspSigningCert();
     }
 }

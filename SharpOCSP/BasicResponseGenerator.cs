@@ -16,6 +16,17 @@ namespace SharpOCSP
 {
 	class BasicResponseGenerator
     {
+		public enum CrlReason
+		{
+			unspecified = 0,
+			keyCompromise,
+			caCompromise,
+			affiliationChanged,
+			superseded,
+			cessationOfOperation,
+			certificateHold,
+			removeFromCrl = 8
+		}
 		private X509ExtensionsGenerator _extensions_generator;
 		private byte[] _nonce;
 		private string _algorithm;
@@ -74,14 +85,15 @@ namespace SharpOCSP
 			var ocsp_resp = _builder.Generate (_algorithm, _token.GetPrivateKey (), new[]{_token.GetOcspSigningCert ()}, DateTime.UtcNow.AddMinutes (5));
 			return ocsp_resp;
 		}
-		public BasicResponseGenerator (CA issuer) : this (issuer, "SHA1withRSA")
+		public BasicResponseGenerator (IToken token) : this (token, "SHA1withRSA")
 		{
 		}
-		public BasicResponseGenerator(CA issuer, string signingAlgorithm)
+		public BasicResponseGenerator(IToken token, string signingAlgorithm)
 		{
-			_token = issuer.caToken;
+			_token = token;
 			_algorithm = signingAlgorithm;
-			_builder = new BasicOcspRespGenerator (issuer.caCertificate.GetPublicKey());
+			_builder = new BasicOcspRespGenerator (new RespID (_token.GetOcspSigningCert ().SubjectDN));
+			//_builder = new BasicOcspRespGenerator (issuer.caCertificate.GetPublicKey());
 			_extensions_generator = new X509ExtensionsGenerator ();
 		}
     }
