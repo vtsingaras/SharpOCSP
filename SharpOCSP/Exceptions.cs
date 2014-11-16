@@ -9,11 +9,11 @@ namespace SharpOCSP
     class Exceptions
     {
     }
-    public class ConfigurationKeyValueReadException : Exception
+    public class ConfigurationException : Exception
     {
-        public ConfigurationKeyValueReadException(){}
-        public ConfigurationKeyValueReadException(string message) : base(message){}
-        public ConfigurationKeyValueReadException(string message, Exception inner) : base(message, inner){}
+        public ConfigurationException(){}
+        public ConfigurationException(string message) : base(message){}
+        public ConfigurationException(string message, Exception inner) : base(message, inner){}
     }
 
     public class ITokenSignDataException : Exception

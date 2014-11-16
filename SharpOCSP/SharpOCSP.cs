@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using SharpOCSP;
+using System.Collections.Generic;
 using System.Configuration;
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.X509;
@@ -10,10 +11,11 @@ using log4netExtensions;
 
 namespace SharpOCSP
 {
-    class SharpOCSP
+	static class SharpOCSP
     {
 		static ILog log;
-		static CA[] ca_list;
+		public static List<CA> ca_list = new List<CA>();
+		public static List<IToken> token_list = new List<IToken>();
 		static Configuration config;
 		static HttpHandler http_handler;
 
@@ -28,6 +30,15 @@ namespace SharpOCSP
 			}
 			//Issuer not recognized
 			throw new OcspUnrecognizedIssuerException("Unrecognized CA in request.");
+		}
+		public static IToken FindTokenByName(string name)
+		{
+			foreach (var token in token_list) {
+				if (token.Name == name) {
+					return token;
+				}
+			}
+			return null;
 		}
 		public static IToken GetTokenForRequest(OcspReq ocsp_req)
 		{
@@ -113,28 +124,30 @@ namespace SharpOCSP
         static void Main(string[] args)
         {
 			try{
+				log = LogManager.GetLogger ("SharpOCSP");
+				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
 				//check if user supplied xml configuration path, else use current directory
 				if (args != null){
 					config = new Configuration(args[0]);
 				}else{
-					config  = new Configuration(Environment.CurrentDirectory);
+					config  = new Configuration(Environment.CurrentDirectory + "sharpocsp.xml");
 				}
-				Console.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
-				log = LogManager.GetLogger ("SharpOCSP");
 				http_handler = new HttpHandler (SendOcspResponse, "http://127.0.0.1:8080/");
-				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
 				//config = new Configuration("config.xml");
 				//String ca_name = config.getConfigValue("ca_name");
-				ca_list = new CA[1];
-				CA testCA = CA.CAFactoryMethod ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
-					new SoftToken ("TestToken", "/home/vtsingaras/ocsp.AuthCentralCAR4.crt.pem", "/home/vtsingaras/ocsp.AuthCentralCAR4.key.pem"),"/home/vtsingaras/AuthCentralCAR4.crl.pem", "/home/vtsingaras/AuthCentralCAR4.index.txt", false);
-				ca_list[0] = testCA;
+
+				token_list.Add(new SoftToken ("TestToken", "/home/vtsingaras/ocsp.AuthCentralCAR4.crt.pem", "/home/vtsingaras/ocsp.AuthCentralCAR4.key.pem"));
+				CA testCA = CA.CreateCA ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
+					"TestToken","/home/vtsingaras/AuthCentralCAR4.crl.pem", "/home/vtsingaras/AuthCentralCAR4.index.txt", false);
+				ca_list.Add(testCA);
 				//Listen for HTTP requests
 				http_handler.Run ();
 				Console.ReadKey ();
-			}catch(OcspFilesystemException e){
-				log.Error ("Filesystem.", e.InnerException);
-			}catch(OcspInternalMalfunctionException e){
+			}catch (ConfigurationException e){
+				log.Error ("Configuration: " + e.Message);
+			}catch (OcspFilesystemException e){
+				log.Error (e.Message);
+			}catch (OcspInternalMalfunctionException e){
 				log.Error ("The application encountered a serious error: " + e.Message);
 				throw e.InnerException;
 			}

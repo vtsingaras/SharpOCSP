@@ -21,9 +21,9 @@ namespace SharpOCSP
         /// <param name="data">The data to be signed.</param>
         /// <param name="hashAlgorithm">The hashing algorithm, example Crypto.Digests.Sha1Digest</param>
         /// <returns>The digital signature.</returns>
-		abstract public byte[] SignData(byte[] data, IDigest hashAlgorithm);
-		abstract public AsymmetricKeyParameter GetPublicKey ();
-		abstract public AsymmetricKeyParameter GetPrivateKey ();
-		abstract public X509Certificate	GetOcspSigningCert();
+		public abstract byte[] SignData(byte[] data, IDigest hashAlgorithm);
+		public abstract AsymmetricKeyParameter GetPublicKey ();
+		public abstract AsymmetricKeyParameter GetPrivateKey ();
+		public abstract X509Certificate	GetOcspSigningCert();
     }
 }

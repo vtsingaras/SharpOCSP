@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Org.BouncyCastle;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
@@ -17,7 +18,7 @@ using CrlException = Org.BouncyCastle.Security.Certificates.CrlException;
 
 namespace SharpOCSP
 {
-    class CA
+	class CA
     {
         //Public
         public IToken caToken;
@@ -143,9 +144,10 @@ namespace SharpOCSP
 			_crlLock = new ReaderWriterLockSlim (LockRecursionPolicy.NoRecursion);
 			_serialsLock = new ReaderWriterLockSlim (LockRecursionPolicy.NoRecursion);
         }
-		public static CA CAFactoryMethod(string name, string caCertPath, IToken token, string crlPath, string serialsPath, bool compromised = false)
+		public static CA CreateCA(string name, string caCertPath, string token, string crlPath, string serialsPath, bool compromised = false)
 		{
-			var new_ca = new CA(name, caCertPath, token, crlPath, serialsPath, compromised);
+			IToken _itoken = SharpOCSP.FindTokenByName (token);
+			var new_ca = new CA(name, caCertPath, _itoken, crlPath, serialsPath, compromised);
 			new_ca.ReloadCrl ();
 			new_ca.ReloadSerials ();
 			return new_ca;
