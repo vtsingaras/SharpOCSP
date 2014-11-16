@@ -21,17 +21,19 @@ namespace SharpOCSP
     {
         //Public
         public IToken caToken;
-		private string _crlPath;
-		private string _serialsPath;
 		public X509Certificate caCertificate { get; private set; }
 		public bool caCompromised { get; private set; }
         //Private
-		private ReaderWriterLockSlim _crlLock;
-		private ReaderWriterLockSlim _serialsLock; 
+		//CRL
+		private string _crlPath;
 		private X509Crl	_crl;
+		private ReaderWriterLockSlim _crlLock;
+		//index.txt
+		private string _serialsPath;
+		private ReaderWriterLockSlim _serialsLock; 
 		private IList<BigInteger> _serials;
 		private X509CrlParser _crlReader;
-		//private AsymmetricKeyParameter caKey;
+		//ca specific
 		private string _name;
 		private DateTime _crlLastUpdate;
 		private DateTime _serialsLastUpdate;
@@ -54,6 +56,10 @@ namespace SharpOCSP
 				using (var crl_stream = new FileStream (_crlPath, FileMode.Open)) {
 					_crl = _crlReader.ReadCrl (crl_stream);
 				}
+			}catch (System.UnauthorizedAccessException e){
+				throw new OcspFilesystemException ("Error reading CRL: " + _crlPath, e);
+			}catch (FileNotFoundException e){
+				throw new OcspFilesystemException ("Error reading CRL: " + _crlPath, e);
 			}
 			finally{
 				_crlLock.ExitWriteLock ();
@@ -86,12 +92,15 @@ namespace SharpOCSP
 				using (var serials_reader = new StreamReader(File.OpenRead(_serialsPath)) ) {
 					while(!serials_reader.EndOfStream){
 						string db_line = serials_reader.ReadLine();
-						//serial is entry number 4, tab separated
-						var tmp_string = db_line.Split(new char[1]{'\t'},6)[3];
-						var serial_read = new BigInteger(tmp_string, 16);
+						//serial is entry number 4, tab separated, in hexstring
+						var serial_read = new BigInteger(db_line.Split(new char[1]{'\t'},6)[3], 16);
 						_serials.Add(serial_read);
 					}
 				}
+			}catch (System.UnauthorizedAccessException e){
+				throw new OcspFilesystemException ("Error reading index.txt: " + _serialsPath, e);
+			}catch (FileNotFoundException e){
+				throw new OcspFilesystemException ("Error reading index.txt: " + _serialsPath, e);
 			}
 			finally
 			{
@@ -106,9 +115,14 @@ namespace SharpOCSP
 		private CA(string name, string caCertPath, IToken token, string crlPath, string serialsPath, bool compromised = false)
         {
             //Read CA certificate 
-            var certReader = new PemReader(new StreamReader(caCertPath));
-            caCertificate = (X509Certificate)certReader.ReadObject();
-			//caKey = caCertificate.GetPublicKey();
+			try{
+	            var certReader = new PemReader(new StreamReader(caCertPath));
+	            caCertificate = (X509Certificate)certReader.ReadObject();
+			}catch (System.UnauthorizedAccessException e){
+				throw new OcspFilesystemException ("Error reading ca certificate: " + caCertPath, e);
+			}catch (FileNotFoundException e){
+				throw new OcspFilesystemException ("Error reading ca certificate: " + caCertPath, e);
+			}
 			//Set name to SubjectDN if null
 			if (name == null) {
 				_name = caCertificate.SubjectDN.ToString ();

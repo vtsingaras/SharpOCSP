@@ -4,11 +4,12 @@ using System.Linq;
 using System.IO;
 
 using Org.BouncyCastle;
-using Crypto = Org.BouncyCastle.Crypto;
-using Engines = Org.BouncyCastle.Crypto.Engines;
-using Signers = Org.BouncyCastle.Crypto.Signers;
-using X509 = Org.BouncyCastle.X509;
-using OpenSsl = Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Signers;
+using Org.BouncyCastle.X509;
+using Org.BouncyCastle.OpenSsl;
 
 namespace SharpOCSP
 {
@@ -19,48 +20,61 @@ namespace SharpOCSP
             get;
             private set;
         }
-        private X509.X509Certificate ocspCertificate;
-        private Crypto.Parameters.RsaPrivateCrtKeyParameters privateKey;
+		private X509Certificate _ocspCertificate;
+		private RsaPrivateCrtKeyParameters _privateKey;
         /// <summary>
         /// Creates an instance of a 'SoftToken'.
         /// </summary>
         /// <param name="name">The token's name.</param>
         /// <param name="certPath">Path to OCSP signer certificate.</param>
         /// <param name="keyPath">Path to OCSP signer certificate key.</param>
-		public byte[] SignData(byte[] data, Crypto.IDigest digestAlgorithm)
+		public byte[] SignData(byte[] data, IDigest digestAlgorithm)
 		{
 			byte[] signature;
-			Signers.RsaDigestSigner rsaSigner = new Crypto.Signers.RsaDigestSigner(digestAlgorithm);
+			RsaDigestSigner rsaSigner = new RsaDigestSigner(digestAlgorithm);
 
-			rsaSigner.Init(true, privateKey);
+			rsaSigner.Init(true, _privateKey);
 			rsaSigner.BlockUpdate(data, 0, data.Length);
 			signature = rsaSigner.GenerateSignature();
 			rsaSigner.Reset();
 
 			return signature;
 		}
-		public Crypto.AsymmetricKeyParameter GetPublicKey ()
+		public AsymmetricKeyParameter GetPublicKey ()
 		{
-			return ocspCertificate.GetPublicKey ();
+			return _ocspCertificate.GetPublicKey ();
 		}
-		public Crypto.AsymmetricKeyParameter GetPrivateKey ()
+		public AsymmetricKeyParameter GetPrivateKey ()
 		{
-			return  (Crypto.AsymmetricKeyParameter)privateKey;
+			return  (AsymmetricKeyParameter)_privateKey;
 		}
-		public X509.X509Certificate GetOcspSigningCert()
+		public X509Certificate GetOcspSigningCert()
 		{
-			return ocspCertificate;
+			return _ocspCertificate;
 		}
         public SoftToken(string name,string certPath, string keyPath)
         {
             Name = name;
             //Read OCSP signer certificate
-            var ocspCertReader = new OpenSsl.PemReader(new StreamReader(certPath));
-			ocspCertificate = (X509.X509Certificate) ocspCertReader.ReadObject();
+			try{
+	            var ocspCertReader = new PemReader(new StreamReader(certPath));
+				_ocspCertificate = (X509Certificate) ocspCertReader.ReadObject();
+			}catch (System.UnauthorizedAccessException e){
+				throw new OcspFilesystemException ("Error reading ocsp certificate: " + keyPath, e);
+			}catch (FileNotFoundException e){
+				throw new OcspFilesystemException ("Error reading ocsp certificate: " + keyPath, e);
+			}
             //Read private key
-            var keyReader = new OpenSsl.PemReader(new StreamReader(keyPath));
-			var key_pem = (Crypto.AsymmetricCipherKeyPair) keyReader.ReadObject ();
-			privateKey = (Crypto.Parameters.RsaPrivateCrtKeyParameters) key_pem.Private;
+			try{
+            	var keyReader = new PemReader(new StreamReader(keyPath));
+				var key_pem = (AsymmetricCipherKeyPair) keyReader.ReadObject ();
+				_privateKey = (RsaPrivateCrtKeyParameters) key_pem.Private;
+			}catch (System.UnauthorizedAccessException e){
+				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
+			}
+			catch (FileNotFoundException e){
+				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
+			}
         }
     }
 }

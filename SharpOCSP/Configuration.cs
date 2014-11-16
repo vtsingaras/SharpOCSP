@@ -14,7 +14,7 @@ namespace SharpOCSP
 				return config[key];
 			}catch (KeyNotFoundException e){
 				throw new ConfigurationKeyValueReadException ("Could not read requested key.", e);
-			}catch (Exception e){
+			}catch (Exception){
 				return "true";
 			}
         }

@@ -30,34 +30,16 @@ namespace SharpOCSP
 			//Issuer not recognized
 			throw new OcspUnrecognizedIssuerException("Unrecognized CA in request.");
 		}
-		public static OcspReq GetRequestFromHttp(HttpListenerRequest http_request)
-		{
-			OcspReq ocsp_req = null;
-			try{
-				//check if mime-type is application/ocsp-request
-				if ( http_request.Headers["Content-Type"] != "application/ocsp-request"){
-					throw new OcspMalformedRequestException("Wrong MIME type.");
-				}
-				switch (http_request.HttpMethod) {
-				case "GET":
-					var get_request = http_request.Url.PathAndQuery.Remove (0, 1);
-					get_request = WebUtility.UrlDecode(get_request);
-					ocsp_req = new OcspReq (System.Convert.FromBase64String(get_request));
-					break;
-				case "POST":
-					ocsp_req = new OcspReq (http_request.InputStream);
-					break;
-				}
-			}catch (System.FormatException e){
-				throw new OcspMalformedRequestException ("Could not parse request.", e);
-			}
-			return ocsp_req;
-		}
+
 		public static OcspResp CreateResponseForRequest (OcspReq ocsp_req)
 		{
 			try{
 				CertificateID cert_id;
 				CA issuer;
+				//validate ocsp_req
+				if (ocsp_req == null){
+					throw new OcspMalformedRequestException();
+				}
 				issuer = GetIssuerForRequest(ocsp_req);
 				BasicResponseGenerator resp_generator = new BasicResponseGenerator (issuer);
 				//append nonce
@@ -111,25 +93,32 @@ namespace SharpOCSP
 		}
 		public static byte[] SendOcspResponse(HttpListenerRequest http_request)
 		{
-			OcspReq ocsp_req = GetRequestFromHttp(http_request);
+			OcspReq ocsp_req = RequestUtilities.GetRequestFromHttp(http_request);
 			OcspResp ocsp_resp = CreateResponseForRequest(ocsp_req);
 			return ocsp_resp.GetEncoded ();
 		}
         static void Main(string[] args)
         {
-			Console.WriteLine ("SharpOCSP v0.1 OCSP responder by Vyronas Tsingaras firing up!");
-			config = new Configuration("config.xml");
-			//String ca_name = config.getConfigValue("ca_name");
-			ca_list = new CA[1];
-			CA testCA = CA.CAFactoryMethod ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
-				new SoftToken ("TestToken", "/home/vtsingaras/ocsp.AuthCentralCAR4.crt.pem", "/home/vtsingaras/ocsp.AuthCentralCAR4.key.pem"),"/home/vtsingaras/AuthCentralCAR4.crl.pem", "/home/vtsingaras/AuthCentralCAR4.index.txt", false);
-			ca_list[0] = testCA;
-			//Listen for HTTP requests
 			HttpHandler http_handler = new HttpHandler (SendOcspResponse, "http://127.0.0.1:8080/");
-			http_handler.Run ();
-			Console.WriteLine ("Listening for connections...");
-			Console.ReadKey ();
-			http_handler.Stop ();
+			try{
+				Console.WriteLine ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
+				config = new Configuration("config.xml");
+				//String ca_name = config.getConfigValue("ca_name");
+				ca_list = new CA[1];
+				CA testCA = CA.CAFactoryMethod ("TestCA", "/home/vtsingaras/AuthCentralCAR4.pem", 
+					new SoftToken ("TestToken", "/home/vtsingaras/ocsp.AuthCentralCAR4.crt.pem", "/home/vtsingaras/ocsp.AuthCentralCAR4.key.pem"),"/home/vtsingaras/AuthCentralCAR4.crl.pem", "/home/vtsingaras/AuthCentralCAR4.index.txt", false);
+				ca_list[0] = testCA;
+				//Listen for HTTP requests
+				http_handler.Run ();
+				Console.ReadKey ();
+			}catch(OcspFilesystemException e){
+				Console.WriteLine ("FATAL: Filesystem.");
+				Console.WriteLine (e.InnerException.Message);
+			}catch(OcspInternalMalfunctionException e){
+				Console.WriteLine ("The application encountered a serious error: " + e.Message);
+				Console.WriteLine ("Please send the following stacktrace.");
+				throw e.InnerException;
+			}
         }
     }
 }

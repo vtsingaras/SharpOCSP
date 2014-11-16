@@ -52,7 +52,9 @@ namespace SharpOCSP
 						}
 					}
 					//TODO: implement proper exception handling
-					catch { } // suppress any exceptions
+					catch (HttpListenerException e ){
+						Console.WriteLine("Error handling http." + e.Message);
+					}
 				});
 		}
 

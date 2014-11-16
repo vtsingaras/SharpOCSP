@@ -34,7 +34,13 @@ namespace SharpOCSP
 		public OcspMalformedRequestException(string message) : base(message) { }
 		public OcspMalformedRequestException(string message, Exception inner) : base(message, inner) { }
 	}
-	//Never catch this
+	public class OcspFilesystemException : Exception
+	{
+		public OcspFilesystemException() { }
+		public OcspFilesystemException(string message) : base(message) { }
+		public OcspFilesystemException(string message, Exception inner) : base(message, inner) { }
+	}
+	//Never catch this gracefully
 	public class OcspInternalMalfunctionException : Exception
 	{
 		public OcspInternalMalfunctionException() { }
