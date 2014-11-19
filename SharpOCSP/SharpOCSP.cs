@@ -22,10 +22,11 @@ namespace SharpOCSP
 		static Configuration config;
 		static HttpHandler http_handler;
 		//Signal handling on UNIX
+		private static Thread signaling_thread;
 		private static void setupSignalHandlers()
 		{
-			Thread _thread = new Thread(new ThreadStart(signalHandlerThread));
-			_thread.Start();
+			signaling_thread = new Thread(new ThreadStart(signalHandlerThread));
+			signaling_thread.Start();
 		}
 
 		private static void signalHandlerThread()
@@ -39,7 +40,7 @@ namespace SharpOCSP
 			};
 
 			while (true) {
-				int index = UnixSignal.WaitAny (signals,-1);
+				int index = UnixSignal.WaitAny (signals, -1);
 				Signum signal = signals [index].Signum;
 				signalHandler(signal);
 			};
@@ -54,6 +55,8 @@ namespace SharpOCSP
 				break;
 			case Signum.SIGUSR2:
 				OnCrlReload ();
+				break;
+			default:
 				break;
 			}
 		}
@@ -202,6 +205,8 @@ namespace SharpOCSP
 			}catch (OcspInternalMalfunctionException e){
 				log.Error ("The application encountered a serious error: " + e.Message);
 				throw e.InnerException;
+			}finally{
+				signaling_thread.Abort ();
 			}
         }
     }

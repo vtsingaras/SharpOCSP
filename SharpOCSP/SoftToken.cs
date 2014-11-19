@@ -51,6 +51,8 @@ namespace SharpOCSP
         public SoftToken(string name,string certPath, string keyPath)
         {
             Name = name;
+			SharpOCSP.log.Debug ("Configuring token: " + name);
+			SharpOCSP.log.Debug ("Certificate path: " + certPath);
             //Read OCSP signer certificate
 			try{
 	            var ocspCertReader = new PemReader(new StreamReader(certPath));
@@ -60,15 +62,21 @@ namespace SharpOCSP
 			}catch (FileNotFoundException e){
 				throw new OcspFilesystemException ("Error reading ocsp certificate: " + keyPath, e);
 			}
+			SharpOCSP.log.Debug ("Certificate key path: " + keyPath);
             //Read private key
 			try{
             	var keyReader = new PemReader(new StreamReader(keyPath));
-				var key_pem = (AsymmetricCipherKeyPair) keyReader.ReadObject ();
-				_privateKey = (RsaPrivateCrtKeyParameters) key_pem.Private;
+				var key_from_pem =  keyReader.ReadObject () as RsaPrivateCrtKeyParameters;
+				if ( key_from_pem != null){
+					_privateKey = key_from_pem;
+				}else{
+		//			_privateKey = (AsymmetricCipherKeyPair)key_from_pem.Private;
+				}
 			}catch (System.UnauthorizedAccessException e){
 				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
-			}
-			catch (FileNotFoundException e){
+			}catch (FileNotFoundException e){
+				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
+			}catch (InvalidCastException e){
 				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
 			}
         }

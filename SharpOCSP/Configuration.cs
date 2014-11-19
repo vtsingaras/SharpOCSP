@@ -39,18 +39,28 @@ namespace SharpOCSP
 				throw new ConfigurationException ("No tokens supplied!");
 			}
 			foreach (XmlElement token_config in tokenNodeList){
-				try{
-					var name = token_config ["name"].InnerText;
-					var type = token_config ["type"].InnerText ?? "software";
-					var ocspCertificate = token_config ["certificate"].InnerText;
-					var ocspKey = token_config ["certificateKey"].InnerText;
-					if(type == "software"){
-						SharpOCSP.token_list.Add(new SoftToken(name, ocspCertificate, ocspKey));
-					}else{
-						throw new ConfigurationException("Only software tokens for now...");
-					}
-				}catch (NullReferenceException e){
-					throw new ConfigurationException ("Unable to parse token: " + token_config ["name"].InnerText ?? "unknown", e);
+				string name, type, ocspCertificate, ocspKey;
+				if (token_config ["name"] != null) {
+					name = token_config ["name"].InnerText;
+				} else {
+					throw new ConfigurationException("Unable to parse token name.");
+				}
+				//default to software
+				type = ( token_config ["type"] != null) ? token_config["type"].InnerText : "software";
+				if (token_config ["certificate"] != null) {
+					ocspCertificate = token_config ["certificate"].InnerText;
+				}else{
+					throw new ConfigurationException ("Unable to parse certificate path.");
+				}
+				if (token_config ["certificateKey"] != null) {
+					ocspKey = token_config ["certificateKey"].InnerText;
+				} else {
+					throw new ConfigurationException ("Unable to parse key path.");
+				}
+				if(type == "software"){
+					SharpOCSP.token_list.Add(new SoftToken(name, ocspCertificate, ocspKey));
+				}else{
+					throw new ConfigurationException("Only software tokens for now...");
 				}
 			}
 			//build CAs
