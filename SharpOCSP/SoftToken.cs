@@ -66,11 +66,16 @@ namespace SharpOCSP
             //Read private key
 			try{
             	var keyReader = new PemReader(new StreamReader(keyPath));
-				var key_from_pem =  keyReader.ReadObject () as RsaPrivateCrtKeyParameters;
-				if ( key_from_pem != null){
-					_privateKey = key_from_pem;
-				}else{
-		//			_privateKey = (AsymmetricCipherKeyPair)key_from_pem.Private;
+				var key_from_pem =  keyReader.ReadObject ();
+				RsaPrivateCrtKeyParameters private_key = key_from_pem as RsaPrivateCrtKeyParameters;
+				AsymmetricCipherKeyPair private_key_pair = key_from_pem as AsymmetricCipherKeyPair;
+				if ( private_key != null){
+					_privateKey = private_key;
+				}else if (private_key_pair != null){
+					_privateKey = (RsaPrivateCrtKeyParameters)private_key_pair.Private;
+				}
+				else{
+					throw new OcspFilesystemException("Error reading private key: " + keyPath);
 				}
 			}catch (System.UnauthorizedAccessException e){
 				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
