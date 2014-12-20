@@ -15,52 +15,14 @@ namespace SharpOCSP
 {
 	static class SharpOCSP
     {
-		public static ILog log;
+		public static ILog log = null;
 		public static List<string> url_list = new List<string> ();
 		public static List<CA> ca_list = new List<CA>();
 		public static List<IToken> token_list = new List<IToken>();
-		static Configuration config;
-		static HttpHandler http_handler;
-		//Signal handling on UNIX
-		private static Thread signaling_thread;
-		private static void setupSignalHandlers()
-		{
-			signaling_thread = new Thread(new ThreadStart(signalHandlerThread));
-			signaling_thread.Start();
-		}
+		private static Configuration config =null;
+		private static HttpHandler http_handler =null;
+		private static SignalHandler signaler = null;
 
-		private static void signalHandlerThread()
-		{
-			// signal handler thread
-			// repeatedly waits for incoming signals until masterExit
-
-			UnixSignal[] signals = new UnixSignal [] {
-				new UnixSignal (Signum.SIGUSR1),
-				new UnixSignal (Signum.SIGUSR2),
-			};
-
-			while (true) {
-				int index = UnixSignal.WaitAny (signals, -1);
-				Signum signal = signals [index].Signum;
-				signalHandler(signal);
-			};
-		}
-
-		private static void signalHandler(Signum signal)
-		{
-			switch (signal)
-			{
-			case Signum.SIGUSR1:
-				OnSerialsReload ();
-				break;
-			case Signum.SIGUSR2:
-				OnCrlReload ();
-				break;
-			default:
-				break;
-			}
-		}
-		//End signal handling
 		public static void OnSerialsReload()
 		{
 			foreach (CA ca in ca_list) {
@@ -179,7 +141,7 @@ namespace SharpOCSP
         {
 			Console.WriteLine (Process.GetCurrentProcess ().Id);
 			if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
-				setupSignalHandlers ();
+				signaler = new SignalHandler (OnCrlReload, OnSerialsReload);
 			}
 			try{
 				log = LogManager.GetLogger ("SharpOCSP");
@@ -209,7 +171,7 @@ namespace SharpOCSP
 				throw e.InnerException;
 			}finally{
 				if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
-					signaling_thread.Abort ();
+					signaler.Dispose();
 				}
 			}
         }

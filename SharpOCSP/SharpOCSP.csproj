@@ -69,6 +69,7 @@
     <Compile Include="SharpOCSP.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Logging.cs" />
+    <Compile Include="SignalHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
