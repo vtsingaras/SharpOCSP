@@ -70,13 +70,9 @@ namespace SharpOCSP
 			var status = new RevokedStatus (DateTime.UtcNow, (int)CrlReason.caCompromise);
 			_builder.AddResponse (cert_id, status);
 		}
-		public void AppendNonce(Asn1OctetString nonce)
+		public void SetNonce(Asn1OctetString nonce)
 		{
-			if (nonce != null) {
-				_nonce = nonce.GetOctets ();
-			}else {
-				_nonce = null;
-			}
+			_nonce = nonce.GetOctets ();
 		}
 		public BasicOcspResp Generate()
 		{
