@@ -178,7 +178,9 @@ namespace SharpOCSP
         static void Main(string[] args)
         {
 			Console.WriteLine (Process.GetCurrentProcess ().Id);
-			setupSignalHandlers ();
+			if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
+				setupSignalHandlers ();
+			}
 			try{
 				log = LogManager.GetLogger ("SharpOCSP");
 				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
@@ -206,7 +208,9 @@ namespace SharpOCSP
 				log.Error ("The application encountered a serious error: " + e.Message);
 				throw e.InnerException;
 			}finally{
-				signaling_thread.Abort ();
+				if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
+					signaling_thread.Abort ();
+				}
 			}
         }
     }
