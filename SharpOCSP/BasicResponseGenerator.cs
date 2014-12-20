@@ -28,7 +28,7 @@ namespace SharpOCSP
 			removeFromCrl = 8
 		}
 		private X509ExtensionsGenerator _extensions_generator;
-		private byte[] _nonce;
+		private byte[] _nonce = null;
 		private string _algorithm;
 		private IToken _token;
 		private BasicOcspRespGenerator _builder;
@@ -61,9 +61,7 @@ namespace SharpOCSP
 			_builder.AddResponse (cert_id, status, DateTime.UtcNow.AddMinutes (5), null);
 			//now add the extended revocation extension
 			var extended_revoke_oid = new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.9");
-			try{
-				_extensions_generator.AddExtension (extended_revoke_oid, false, DerNull.Instance.GetEncoded());
-			}catch (System.ArgumentException){}
+			_extensions_generator.AddExtension (extended_revoke_oid, false, DerNull.Instance.GetEncoded());
 		}
 		public void AddCaCompromisedResponse(CertificateID cert_id)
 		{
@@ -77,7 +75,8 @@ namespace SharpOCSP
 		public BasicOcspResp Generate()
 		{
 			//append nonce if we have it
-			_extensions_generator.AddExtension (new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.2"), false, _nonce);
+			if (_nonce != null)
+                _extensions_generator.AddExtension (new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.2"), false, _nonce);
 			//set responseExtensions
 			_builder.SetResponseExtensions (_extensions_generator.Generate ());
 			var ocsp_resp = _builder.Generate (_algorithm, _token.GetPrivateKey (), new[]{_token.GetOcspSigningCert ()}, DateTime.UtcNow.AddMinutes (5));
