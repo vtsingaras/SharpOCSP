@@ -47,9 +47,18 @@ namespace SharpOCSP
 			signaling_thread = new Thread(new ThreadStart(signalHandlerThread));
 			signaling_thread.Start();
 		}
+        protected virtual void Dispose(bool nativeonly)
+        {
+            if(nativeonly)
+            {
+                return;
+            }
+            signaling_thread.Abort();
+        }
 		public void Dispose()
 		{
-			signaling_thread.Abort ();
+            Dispose(true);
+            GC.SuppressFinalize(this);
 		}
 	}
 }

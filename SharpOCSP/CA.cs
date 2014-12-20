@@ -20,25 +20,17 @@ namespace SharpOCSP
 {
 	class CA
     {
-        //Public
         public IToken caToken;
 		public X509Certificate caCertificate { get; private set; }
 		public bool caCompromised { get; private set; }
-        //Private
-		//CRL
 		private string _crlPath;
 		private X509Crl	_crl;
 		private ReaderWriterLockSlim _crlLock;
-		//index.txt
 		private string _serialsPath;
 		private ReaderWriterLockSlim _serialsLock; 
 		private IList<BigInteger> _serials;
 		private X509CrlParser _crlReader;
-		//ca specific
 		private string _name;
-		//replace polling with Timers
-		//private DateTime _crlLastUpdate = DateTime.MinValue;
-		//private DateTime _serialsLastUpdate = DateTime.MinValue;
 
 		public X509CrlEntry GetCrlEntry(BigInteger serial)
 		{

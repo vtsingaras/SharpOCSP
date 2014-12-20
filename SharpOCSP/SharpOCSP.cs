@@ -145,7 +145,7 @@ namespace SharpOCSP
 			}
 			try{
 				log = LogManager.GetLogger ("SharpOCSP");
-				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
+				log.Always ("SharpOCSP v0.2 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
 				//check if user supplied xml configuration path, else use current directory
 				//This will also initialize all CAs and tokens
 				if (args != null){

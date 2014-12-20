@@ -93,11 +93,11 @@ namespace SharpOCSP
 			//get interfaces
 			XmlNode uriprefixesNode = doc.SelectSingleNode ("//uriprefixes");
 			if (uriprefixesNode == null) {
-				throw new ConfigurationException ("No URIs supplied!");
+				throw new ConfigurationException ("No URI list supplied!");
 			}
 			XmlNodeList uriprefixNodeList = uriprefixesNode.SelectNodes("./uriprefix");
 			if (uriprefixNodeList.Count <= 0) {
-				throw new ConfigurationException ("No URIs to listen on supplied!");
+				throw new ConfigurationException ("URI list is empty!");
 			}
 			foreach (XmlElement url in uriprefixNodeList) {
 				SharpOCSP.url_list.Add (url.InnerText);
