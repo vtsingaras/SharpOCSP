@@ -18,7 +18,7 @@ using CrlException = Org.BouncyCastle.Security.Certificates.CrlException;
 
 namespace SharpOCSP
 {
-	class CA
+	public class CA
     {
         public IToken caToken;
 		public X509Certificate caCertificate { get; private set; }

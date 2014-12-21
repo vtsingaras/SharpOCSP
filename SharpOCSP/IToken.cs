@@ -9,7 +9,7 @@ using Org.BouncyCastle.X509;
 
 namespace SharpOCSP
 {
-	abstract class IToken
+	public abstract class IToken
     {
         /// <summary>
         /// Gets the token name.

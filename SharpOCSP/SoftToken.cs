@@ -13,7 +13,7 @@ using Org.BouncyCastle.OpenSsl;
 
 namespace SharpOCSP
 {
-    class SoftToken : IToken
+    public class SoftToken : IToken
     {
 		public  override String Name{ get ; protected set; }
 		private X509Certificate _ocspCertificate;

@@ -61,7 +61,10 @@ namespace SharpOCSP
 			_builder.AddResponse (cert_id, status, DateTime.UtcNow.AddMinutes (5), null);
 			//now add the extended revocation extension
 			var extended_revoke_oid = new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.9");
-			_extensions_generator.AddExtension (extended_revoke_oid, false, DerNull.Instance.GetEncoded());
+			//don't crash if extension was already added
+			try{
+				_extensions_generator.AddExtension (extended_revoke_oid, false, DerNull.Instance.GetEncoded());
+			}catch (System.ArgumentException){}
 		}
 		public void AddCaCompromisedResponse(CertificateID cert_id)
 		{

@@ -15,7 +15,7 @@ namespace SharpOCSP
 {
 	static class SharpOCSP
     {
-		public static ILog log = null;
+		public static ILog log = LogManager.GetLogger ("SharpOCSP");
 		public static List<string> url_list = new List<string> ();
 		public static List<CA> ca_list = new List<CA>();
 		public static List<IToken> token_list = new List<IToken>();
@@ -144,14 +144,13 @@ namespace SharpOCSP
 				signaler = new SignalHandler (OnCrlReload, OnSerialsReload);
 			}
 			try{
-				log = LogManager.GetLogger ("SharpOCSP");
-				log.Always ("SharpOCSP v0.2 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
+				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
 				//check if user supplied xml configuration path, else use current directory
 				//This will also initialize all CAs and tokens
-				if (args != null){
+				if (args.Length != 0){
 					config = new Configuration(args[0]);
 				}else{
-					config  = new Configuration(Environment.CurrentDirectory + "sharpocsp.xml");
+					config  = new Configuration(Environment.CurrentDirectory + "\\sharpocsp.xml");
 				}
 				try{
 					http_handler = new HttpHandler (SendOcspResponse, url_list.ToArray());
