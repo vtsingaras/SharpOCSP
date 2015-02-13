@@ -80,7 +80,7 @@ namespace SharpOCSP
 				IToken token = GetTokenForRequest(ocsp_req);
 				BasicResponseGenerator resp_generator = new BasicResponseGenerator (token);
 				//append nonce
-				var nonce = ocsp_req.GetExtensionValue (new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.2"));
+                var nonce = RequestUtilities.ExtractNonce(ocsp_req);
 				if(nonce != null) resp_generator.SetNonce (nonce);
 				foreach (Req single_req in ocsp_req.GetRequestList())
 				{

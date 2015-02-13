@@ -63,7 +63,7 @@ namespace SharpOCSP
 					break;
 				}
 			}catch (System.FormatException){
-				Console.WriteLine ("Could not parse" + http_request.HttpMethod + " request.");
+				Console.WriteLine ("Could not parse " + http_request.HttpMethod + " request.");
 				ocsp_req = null;
 			}
 			return ocsp_req;
