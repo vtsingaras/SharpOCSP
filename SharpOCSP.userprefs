@@ -1,12 +1,12 @@
-﻿<Properties>
+﻿<Properties StartupItem="SharpOCSP\SharpOCSP.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Tests\ResponseGenerationTests.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="c:\Users\Vyronas\Documents\GitHub\SharpOCSP\SharpOCSP\SharpOCSP.cs">
     <Files>
-      <File FileName="Tests\TokenCACreationTests.cs" Line="18" Column="18" />
-      <File FileName="c:\Users\Vyronas\Documents\GitHub\SharpOCSP\SharpOCSP\SharpOCSP.cs" Line="32" Column="32" />
-      <File FileName="SharpOCSP\BasicResponseGenerator.cs" Line="29" Column="29" />
-      <File FileName="SharpOCSP\Configuration.cs" Line="9" Column="9" />
-      <File FileName="Tests\ResponseGenerationTests.cs" Line="4" Column="4" />
+      <File FileName="Tests\TokenCACreationTests.cs" Line="1" Column="1" />
+      <File FileName="c:\Users\Vyronas\Documents\GitHub\SharpOCSP\SharpOCSP\SharpOCSP.cs" Line="20" Column="20" />
+      <File FileName="SharpOCSP\BasicResponseGenerator.cs" Line="1" Column="1" />
+      <File FileName="SharpOCSP\Configuration.cs" Line="1" Column="1" />
+      <File FileName="Tests\ResponseGenerationTests.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
