@@ -19,7 +19,7 @@ namespace SharpOCSP
 		public static List<string> url_list = new List<string> ();
 		public static List<CA> ca_list = new List<CA>();
 		public static List<IToken> token_list = new List<IToken>();
-		private static Configuration config =null;
+		public static Configuration config = null;
 		private static HttpHandler http_handler =null;
 		private static SignalHandler signaler = null;
 

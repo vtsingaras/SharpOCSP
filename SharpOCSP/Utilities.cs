@@ -7,6 +7,11 @@ namespace SharpOCSP
 {
 	public static class DataUtilities
 	{
+		public static bool IsValidUrl(string source)
+		{
+			Uri uriResult;
+			return Uri.TryCreate(source, UriKind.Absolute, out uriResult) && ( uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps );
+		}
 		public static string ByteArrayToString(byte[] ba)
 		{
 			string hex = BitConverter.ToString(ba);
@@ -63,7 +68,7 @@ namespace SharpOCSP
 					break;
 				}
 			}catch (System.FormatException){
-				Console.WriteLine ("Could not parse " + http_request.HttpMethod + " request.");
+				Console.WriteLine ("Could not parse" + http_request.HttpMethod + " request.");
 				ocsp_req = null;
 			}
 			return ocsp_req;
