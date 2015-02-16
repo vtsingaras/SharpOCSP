@@ -80,8 +80,11 @@ namespace SharpOCSP
 				IToken token = GetTokenForRequest(ocsp_req);
 				BasicResponseGenerator resp_generator = new BasicResponseGenerator (token);
 				//append nonce
-                var nonce = RequestUtilities.ExtractNonce(ocsp_req);
-				if(nonce != null) resp_generator.SetNonce (nonce);
+				var nonce = RequestUtilities.ExtractNonce(ocsp_req);
+				if(nonce != null)
+				{
+					resp_generator.SetNonce (nonce);
+				}
 				foreach (Req single_req in ocsp_req.GetRequestList())
 				{
 					CertificateID cert_id;
@@ -139,12 +142,12 @@ namespace SharpOCSP
 		}
         static void Main(string[] args)
         {
-			Console.WriteLine (Process.GetCurrentProcess ().Id);
+			Console.WriteLine ("PID for daemon: " + Process.GetCurrentProcess ().Id);
 			if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
 				signaler = new SignalHandler (OnCrlReload, OnSerialsReload);
 			}
 			try{
-				log.Always ("SharpOCSP v0.1 OCSP responder by pki.io and Vyronas Tsingaras (c) 2014 firing up!");
+				log.Always ("SharpOCSP v0.1 OCSP responder by Vyronas Tsingaras (c) 2015 firing up!");
 				//check if user supplied xml configuration path, else use current directory
 				//This will also initialize all CAs and tokens
 				if (args.Length != 0){
