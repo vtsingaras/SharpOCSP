@@ -78,11 +78,11 @@ namespace SharpOCSP
 					throw new OcspFilesystemException("Error reading private key: " + keyPath);
 				}
 			}catch (System.UnauthorizedAccessException e){
-				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
+				throw new OcspFilesystemException ("Can't access private key path: " + keyPath, e);
 			}catch (FileNotFoundException e){
-				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
+				throw new OcspFilesystemException ("PEM file doesn't exist: " + keyPath, e);
 			}catch (InvalidCastException e){
-				throw new OcspFilesystemException ("Error reading private key: " + keyPath, e);
+				throw new OcspFilesystemException ("Is it PEM really?: " + keyPath, e);
 			}
         }
     }

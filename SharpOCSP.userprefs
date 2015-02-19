@@ -1,4 +1,4 @@
-﻿<Properties StartupItem="SharpOCSP\SharpOCSP.csproj">
+﻿<Properties StartupItem="SharpOCSP/SharpOCSP.csproj" GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="c:\Users\Vyronas\Documents\GitHub\SharpOCSP\SharpOCSP\SharpOCSP.cs">
     <Files>
