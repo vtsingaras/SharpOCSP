@@ -58,6 +58,7 @@ namespace SharpOCSP
 		}
 		public static IToken GetTokenForRequest(OcspReq ocsp_req)
 		{
+			//TODO: Leverage RequestUtilities.RespondersMatch method to perform the token comparison
 			//get first singleRequest
 			Req first_single_req = ocsp_req.GetRequestList () [0];
 			IToken _token_a = GetIssuerForSingleRequest (first_single_req).caToken;
