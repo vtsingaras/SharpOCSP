@@ -44,30 +44,6 @@ namespace SharpOCSP
 							ThreadPool.QueueUserWorkItem((c) =>
 								{
 									var ctx = c as HttpListenerContext;
-									String fwd_uri;
-									if ( (fwd_uri = SharpOCSP.config.getConfigValue("http-forward-to")) != null )
-									{
-										HttpWebRequest fwd_req = (HttpWebRequest)HttpWebRequest.Create(fwd_uri);
-										switch (ctx.Request.HttpMethod)
-										{
-										case "GET":
-											fwd_uri += ctx.Request.Url.PathAndQuery.Remove (0, 1);
-											break;
-										case "POST":
-											Stream req_stream = fwd_req.GetRequestStream();
-											ctx.Request.InputStream.CopyTo(req_stream);
-											req_stream.Flush();
-											break;
-										}
-										try{
-											//TODO
-											//fwd_req.Headers.Add("X-Request-GUID", blah);
-											fwd_req.Headers.Add("Content-Type", "application/ocsp-request");
-											fwd_req.GetResponse();
-										}catch(Exception ex){
-											SharpOCSP.log.Error("Error forwarding request.");
-										}
-									}
 									byte[] buf = _responderMethod(ctx.Request);
 									ctx.Response.AppendHeader("Content-Type", "application/ocsp-response");
 									ctx.Response.ContentLength64 = buf.Length;

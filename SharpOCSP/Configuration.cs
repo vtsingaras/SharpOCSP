@@ -107,12 +107,6 @@ namespace SharpOCSP
 			//check if extendedrevoke is yes or no
 			_config.Add("extendedrevoke", 
 				( extended_revoke != null &&  (extended_revoke.InnerText == "yes" || extended_revoke.InnerText == "no")) ? extended_revoke.InnerText : null);
-			//optionally forward requests to another HTTP endpoint
-			var http_forward_to = doc.SelectSingleNode ("//http-forward-to");
-			if ( http_forward_to != null && DataUtilities.IsValidUrl (http_forward_to.InnerText)) 
-			{
-				_config.Add ("http-forward-to", http_forward_to.InnerText);
-			}
         }
     }
 }
