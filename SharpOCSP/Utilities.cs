@@ -54,8 +54,7 @@ namespace SharpOCSP
 			try{
 				//check if mime-type is application/ocsp-request
 				if ( http_request.Headers["Content-Type"] != "application/ocsp-request"){
-					Console.WriteLine("Wrong MIME type.");
-					ocsp_req = null;
+					SharpOCSP.log.Warn ("Wrong MIME type.");
 				}
 				switch (http_request.HttpMethod) {
 				case "GET":
@@ -66,10 +65,13 @@ namespace SharpOCSP
 				case "POST":
 					ocsp_req = new OcspReq (http_request.InputStream);
 					break;
+				default:
+					throw new OcspMalformedRequestException();
 				}
 			}catch (System.FormatException){
-				Console.WriteLine ("Could not parse " + http_request.HttpMethod + " request.");
-				ocsp_req = null;
+				SharpOCSP.log.Warn ("Could not parse " + http_request.HttpMethod + " request.");
+			}catch (OcspMalformedRequestException ex){
+				SharpOCSP.log.Warn ("Unsupported Request method: " + http_request.HttpMethod);
 			}
 			return ocsp_req;
 		}
