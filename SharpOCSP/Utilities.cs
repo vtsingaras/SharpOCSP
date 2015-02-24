@@ -1,11 +1,36 @@
 ﻿using System;
+using System.Text;
+using System.Runtime.InteropServices;
 using System.Net;
 using System.Linq;
+
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Ocsp;
 
 namespace SharpOCSP
 {
+	public static class PlatformHacks
+	{
+		[DllImport("libc")] // Linux
+		private static extern int prctl(int option, byte[] arg2, IntPtr arg3, IntPtr arg4, IntPtr arg5);
+
+		[DllImport("libc")] // BSD
+		private static extern void setproctitle(byte[] fmt, byte[] str_arg);
+
+		public static void SetProcessName(string name)
+		{
+			try{
+				if (prctl(15 /* PR_SET_NAME */, Encoding.ASCII.GetBytes(name + "\0"),
+					IntPtr.Zero, IntPtr.Zero, IntPtr.Zero) != 0){
+					throw new OcspInternalMalfunctionException("Error setting process name: " +
+						Mono.Unix.Native.Stdlib.GetLastError());
+				}
+			}catch (EntryPointNotFoundException){
+				setproctitle(Encoding.ASCII.GetBytes("%s\0"),
+					Encoding.ASCII.GetBytes(name + "\0"));
+			}
+		}
+	}
 	public static class DataUtilities
 	{
 		public static bool IsValidUrl(string source)
@@ -50,7 +75,11 @@ namespace SharpOCSP
 					ocsp_req = new OcspReq (System.Convert.FromBase64String(get_request));
 					break;
 				case "POST":
-					ocsp_req = new OcspReq (http_request.InputStream);
+					try{
+						ocsp_req = new OcspReq (http_request.InputStream);
+					}catch{
+						ocsp_req = null;
+					}
 					break;
 				default:
 					throw new OcspMalformedRequestException();

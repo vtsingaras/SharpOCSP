@@ -144,8 +144,11 @@ namespace SharpOCSP
         static void Main(string[] args)
         {
 			Console.WriteLine ("PID for daemon: " + Process.GetCurrentProcess ().Id);
-			if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
+			if (Environment.OSVersion.Platform == PlatformID.Unix) {
 				signaler = new SignalHandler (OnCrlReload, OnSerialsReload);
+				if (Environment.OSVersion.Platform != PlatformID.MacOSX) {
+					PlatformHacks.SetProcessName ("sharpocsp");
+				}
 			}
 			try{
 				log.Always ("SharpOCSP v0.1 OCSP responder by Vyronas Tsingaras (c) 2015 firing up!");
