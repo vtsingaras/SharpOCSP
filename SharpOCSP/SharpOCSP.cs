@@ -60,6 +60,9 @@ namespace SharpOCSP
 		{
 			//TODO: Leverage RequestUtilities.RespondersMatch method to perform the token comparison
 			//get first singleRequest
+			if (ocsp_req.GetRequestList ().GetLength (0) <= 0) {
+				throw new OcspMalformedRequestException ("Request list is empty!");
+			}
 			Req first_single_req = ocsp_req.GetRequestList () [0];
 			IToken _token_a = GetIssuerForSingleRequest (first_single_req).caToken;
 			//check if request contains requests for different responders
