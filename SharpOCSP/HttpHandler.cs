@@ -56,6 +56,9 @@ namespace SharpOCSP
 					catch (HttpListenerException e ){
 						Console.WriteLine("Error handling http." + e.Message);
 					}
+					catch (System.ObjectDisposedException e){
+						SharpOCSP.log.Warn("Remote endpoint closed the connection.", e);
+					}
 				});
 		}
 
