@@ -20,5 +20,7 @@
 	<uriprefixes>
 		<uriprefix>http://ocsp.example.com:80/</uriprefix>
 	</uriprefixes>
-	<extendedrevoke>true</extendedrevoke>
+	<extendedrevoke>false</extendedrevoke>
+	<user>ocsp</user>
+	<group>nogroup</group>
 </sharpocsp>
