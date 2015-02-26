@@ -1,0 +1,24 @@
+<sharpocsp>
+	<tokens>
+		<token>
+			<name>token1</name>
+			<type>software</type>
+			<certificate>/home/vtsingaras/token1.pem</certificate>
+			<certificateKey>/home/vtsingaras/token1.key</certificateKey>
+		</token>
+	</tokens>
+	<calist>
+		<ca>
+			<name>ca1</name>
+			<certificate>/home/vtsingaras/cacert.pem</certificate>
+			<token>token1</token>
+			<serials>/home/vtsingaras/index.txt</serials>
+			<crl>/home/vtsingaras/crlv1.pem.crl</crl>
+			<compromised>no</compromised>
+		</ca>
+	</calist>
+	<uriprefixes>
+		<uriprefix>http://ocsp.example.com:80/</uriprefix>
+	</uriprefixes>
+	<extendedrevoke>true</extendedrevoke>
+</sharpocsp>
