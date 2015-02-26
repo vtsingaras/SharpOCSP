@@ -36,7 +36,7 @@ namespace SharpOCSP
 		{
 			ThreadPool.QueueUserWorkItem((o) =>
 				{
-					Console.WriteLine("HTTP handler running...");
+					SharpOCSP.log.Debug("HTTP handler running...");
 					try
 					{
 						while (_listener.IsListening)
@@ -54,7 +54,7 @@ namespace SharpOCSP
 					}
 					//TODO: implement proper exception handling
 					catch (HttpListenerException e ){
-						Console.WriteLine("Error handling http." + e.Message);
+						SharpOCSP.log.Warn("Error handling http." + e.Message);
 					}
 					catch (System.ObjectDisposedException e){
 						SharpOCSP.log.Warn("Remote endpoint closed the connection.", e);
