@@ -35,6 +35,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="BeforeExecute" />
+        <Command type="AfterBuild" command="mkbundle --deps ${TargetFile} log4net.dll BouncyCastle.Crypto.dll -o sharpocsp" workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
     <Externalconsole>true</Externalconsole>
