@@ -68,6 +68,9 @@ namespace SharpOCSP
 			}catch (System.ArgumentNullException e){
 				throw new OcspMalformedRequestException (e.Message);
 			}
+			if (request_list.Length <= 0){
+				throw new OcspMalformedRequestException ("Empty request list.");
+			}
 			//get first singleRequest
 			Req first_single_req = request_list[0];
 			IToken _token_a = GetIssuerForSingleRequest (first_single_req).caToken;
