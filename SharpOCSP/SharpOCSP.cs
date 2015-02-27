@@ -62,14 +62,17 @@ namespace SharpOCSP
 		public static IToken GetTokenForRequest(OcspReq ocsp_req)
 		{
 			//TODO: Leverage RequestUtilities.RespondersMatch method to perform the token comparison
-			//get first singleRequest
-			if (ocsp_req == null || ocsp_req.GetRequestList ().GetLength (0) <= 0) {
-				throw new OcspMalformedRequestException ("Request list is empty!");
+			Req[] request_list = null;
+			try{
+				request_list = ocsp_req.GetRequestList ();
+			}catch (System.ArgumentNullException e){
+				throw new OcspMalformedRequestException (e.Message);
 			}
-			Req first_single_req = ocsp_req.GetRequestList () [0];
+			//get first singleRequest
+			Req first_single_req = request_list[0];
 			IToken _token_a = GetIssuerForSingleRequest (first_single_req).caToken;
 			//check if request contains requests for different responders
-			foreach ( Req single_req in ocsp_req.GetRequestList() )
+			foreach ( Req single_req in request_list )
 			{
 				IToken _token_b = GetIssuerForSingleRequest(single_req).caToken;
 				if ( _token_a != _token_b)
