@@ -108,11 +108,11 @@ namespace SharpOCSP
 			_config.Add("extendedrevoke", 
 				( extended_revoke != null &&  (extended_revoke.InnerText == "yes" || extended_revoke.InnerText == "no")) ? extended_revoke.InnerText : null);
 			var user = doc.SelectSingleNode ("//user");
-			if (user.InnerText != null && user.InnerText != "") {
+			if (user != null && user.InnerText != null && user.InnerText != "") {
 				_config.Add ("user", user.InnerText);
 			}
 			var group = doc.SelectSingleNode ("//group");
-			if (group.InnerText != null && group.InnerText != "") {
+			if (group != null && group.InnerText != null && group.InnerText != "") {
 				_config.Add ("group", group.InnerText);
 			}
         }
