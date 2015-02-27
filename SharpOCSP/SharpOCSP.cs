@@ -74,6 +74,10 @@ namespace SharpOCSP
 			//get first singleRequest
 			Req first_single_req = request_list[0];
 			IToken _token_a = GetIssuerForSingleRequest (first_single_req).caToken;
+			//if we got only one single_req just return this issuer
+			if (request_list.Length == 1) {
+				return _token_a;
+			}
 			//check if request contains requests for different responders
 			foreach ( Req single_req in request_list )
 			{
