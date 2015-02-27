@@ -65,8 +65,8 @@ namespace SharpOCSP
 			Req[] request_list = null;
 			try{
 				request_list = ocsp_req.GetRequestList ();
-			}catch (System.ArgumentNullException e){
-				throw new OcspMalformedRequestException (e.Message);
+			}catch (System.NullReferenceException){
+				throw new OcspMalformedRequestException ("Unknown error parsing the request :(");
 			}
 			if (request_list.Length <= 0){
 				throw new OcspMalformedRequestException ("Empty request list.");
