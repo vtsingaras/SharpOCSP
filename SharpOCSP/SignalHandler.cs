@@ -36,6 +36,9 @@ namespace SharpOCSP
 			case Signum.SIGUSR2:
 				_sigusr2_delegate();
 				break;
+			case Signum.SIGINT:
+				Environment.Exit (1);
+				break;
 			default:
 				break;
 			}

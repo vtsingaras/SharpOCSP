@@ -24,6 +24,7 @@ namespace SharpOCSP
 		public static Configuration config = null;
 		private static HttpHandler http_handler =null;
 		private static SignalHandler signaler = null;
+		private static ManualResetEvent app_exit_event = new ManualResetEvent (false);
 
 		public static void OnSerialsReload()
 		{
@@ -62,7 +63,7 @@ namespace SharpOCSP
 		{
 			//TODO: Leverage RequestUtilities.RespondersMatch method to perform the token comparison
 			//get first singleRequest
-			if (ocsp_req.GetRequestList ().GetLength (0) <= 0) {
+			if (ocsp_req == null || ocsp_req.GetRequestList ().GetLength (0) <= 0) {
 				throw new OcspMalformedRequestException ("Request list is empty!");
 			}
 			Req first_single_req = ocsp_req.GetRequestList () [0];
@@ -79,10 +80,6 @@ namespace SharpOCSP
 		public static OcspResp CreateResponseForRequest (OcspReq ocsp_req)
 		{
 			try{
-				//validate ocsp_req
-				if (ocsp_req == null){
-					throw new OcspMalformedRequestException();
-				}
 				IToken token = GetTokenForRequest(ocsp_req);
 				BasicResponseGenerator resp_generator = new BasicResponseGenerator (token);
 				//append nonce
@@ -196,7 +193,7 @@ namespace SharpOCSP
 				//Listen for HTTP requests
 				http_handler.Run ();
 				//pause
-				Console.ReadKey ();
+				app_exit_event.WaitOne();
 			}catch (ConfigurationException e){
 				log.Error ("Configuration: " + e.Message);
 			}catch (OcspFilesystemException e){
@@ -208,6 +205,7 @@ namespace SharpOCSP
 				if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX) {
 					signaler.Dispose();
 				}
+				Environment.Exit(1);
 			}
         }
     }
