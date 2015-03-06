@@ -66,7 +66,7 @@ namespace SharpOCSP
 			try{
 				//check if mime-type is application/ocsp-request
 				if ( http_request.Headers["Content-Type"] != "application/ocsp-request"){
-					SharpOCSP.log.Warn ("Wrong MIME type.");
+					SharpOCSP.log.Warn ("MIME type of request not application/ocsp-request.");
 				}
 				switch (http_request.HttpMethod) {
 				case "GET":
