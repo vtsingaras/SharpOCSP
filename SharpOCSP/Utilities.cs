@@ -62,7 +62,7 @@ namespace SharpOCSP
 		}
 		public static OcspReq GetRequestFromHttp(HttpListenerRequest http_request)
 		{
-			OcspReq ocsp_req = null;
+			OcspReq ocsp_req;
 			try{
 				//check if mime-type is application/ocsp-request
 				if ( http_request.Headers["Content-Type"] != "application/ocsp-request"){
@@ -86,6 +86,7 @@ namespace SharpOCSP
 					}
 					break;
 				default:
+					ocsp_req = null;
 					SharpOCSP.log.Warn ("Unsupported Request method: " + http_request.HttpMethod);
 				}
 			}catch (OcspMalformedRequestException){
