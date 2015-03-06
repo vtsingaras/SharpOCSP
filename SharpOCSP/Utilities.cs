@@ -70,24 +70,27 @@ namespace SharpOCSP
 				}
 				switch (http_request.HttpMethod) {
 				case "GET":
-					var get_request = http_request.Url.PathAndQuery.Remove (0, 1);
-					get_request = WebUtility.UrlDecode(get_request);
-					ocsp_req = new OcspReq (System.Convert.FromBase64String(get_request));
+					try{
+						var get_request = http_request.Url.PathAndQuery.Remove (0, 1);
+						get_request = WebUtility.UrlDecode(get_request);
+						ocsp_req = new OcspReq (System.Convert.FromBase64String(get_request));
+					}catch{
+						throw new OcspMalformedRequestException();
+					}
 					break;
 				case "POST":
 					try{
 						ocsp_req = new OcspReq (http_request.InputStream);
 					}catch{
-						ocsp_req = null;
+						throw new OcspMalformedRequestException();
 					}
 					break;
 				default:
-					throw new OcspMalformedRequestException();
+					SharpOCSP.log.Warn ("Unsupported Request method: " + http_request.HttpMethod);
 				}
-			}catch (System.FormatException){
-				SharpOCSP.log.Warn ("Could not parse " + http_request.HttpMethod + " request.");
 			}catch (OcspMalformedRequestException){
-				SharpOCSP.log.Warn ("Unsupported Request method: " + http_request.HttpMethod);
+				ocsp_req = null;
+				SharpOCSP.log.Warn ("Could not parse " + http_request.HttpMethod + " request.");
 			}
 			return ocsp_req;
 		}
