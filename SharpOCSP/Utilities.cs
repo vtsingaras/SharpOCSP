@@ -88,6 +88,7 @@ namespace SharpOCSP
 				default:
 					ocsp_req = null;
 					SharpOCSP.log.Warn ("Unsupported Request method: " + http_request.HttpMethod);
+					break;
 				}
 			}catch (OcspMalformedRequestException){
 				ocsp_req = null;
