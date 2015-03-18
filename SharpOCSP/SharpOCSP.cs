@@ -204,6 +204,7 @@ namespace SharpOCSP
 				http_handler.Run ();
 				//pause
 				app_exit_event.WaitOne();
+				Environment.Exit(1);
 			}catch (ConfigurationException e){
 				log.Error ("Configuration: " + e.Message);
 			}catch (OcspFilesystemException e){

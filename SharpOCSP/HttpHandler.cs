@@ -54,10 +54,13 @@ namespace SharpOCSP
 					}
 					//TODO: implement proper exception handling
 					catch (HttpListenerException e ){
-						SharpOCSP.log.Warn("Error handling http." + e.Message);
+						SharpOCSP.log.Warn("Error handling http, Error:" + e.Message);
 					}
-					catch (System.ObjectDisposedException e){
-						SharpOCSP.log.Warn("Remote endpoint closed the connection.", e);
+					catch (IOException){
+						SharpOCSP.log.Warn("Error sending response.");
+					}
+					catch (System.ObjectDisposedException){
+						SharpOCSP.log.Warn("Remote endpoint closed the connection.");
 					}
 				});
 		}
