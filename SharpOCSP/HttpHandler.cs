@@ -36,30 +36,25 @@ namespace SharpOCSP
 			ThreadPool.QueueUserWorkItem((o) =>
 				{
 					SharpOCSP.log.Debug("HTTP handler running...");
-					try
+					while (_listener.IsListening)
 					{
-						while (_listener.IsListening)
-						{
-							ThreadPool.QueueUserWorkItem((c) =>
-								{
-									var ctx = c as HttpListenerContext;
-									byte[] buf = _responderMethod(ctx.Request);
-									ctx.Response.AppendHeader("Content-Type", "application/ocsp-response");
-									ctx.Response.ContentLength64 = buf.Length;
-									ctx.Response.OutputStream.Write(buf, 0, buf.Length);
-									ctx.Response.OutputStream.Close();
-								}, _listener.GetContext());
-						}
-					}
-					//TODO: implement proper exception handling
-					catch (HttpListenerException e ){
-						SharpOCSP.log.Warn("Error handling http, Error:" + e.Message);
-					}
-					catch (IOException){
-						SharpOCSP.log.Warn("Error sending response.");
-					}
-					catch (System.ObjectDisposedException){
-						SharpOCSP.log.Warn("Remote endpoint closed the connection.");
+						ThreadPool.QueueUserWorkItem((c) =>
+							{
+                                try
+                                {
+                                	var ctx = c as HttpListenerContext;
+								    byte[] buf = _responderMethod(ctx.Request);
+								    ctx.Response.AppendHeader("Content-Type", "application/ocsp-response");
+								    ctx.Response.ContentLength64 = buf.Length;
+								    ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+								    ctx.Response.OutputStream.Close();
+                                }
+                                catch (IOException)
+                                {
+                                    SharpOCSP.log.Warn("Remote ednpoint closed the connection.");
+                                    throw;
+                                }
+							}, _listener.GetContext());
 					}
 				});
 		}
