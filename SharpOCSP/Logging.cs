@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
-using log4net;
-using log4net.Layout;
+﻿using log4net;
+using System;
 
 namespace log4netExtensions
 {

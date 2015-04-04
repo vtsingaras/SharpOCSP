@@ -1,20 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Org.BouncyCastle;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Ocsp;
+﻿using Org.BouncyCastle.Math;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.X509;
-using CrlException = Org.BouncyCastle.Security.Certificates.CrlException;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 
 namespace SharpOCSP
 {

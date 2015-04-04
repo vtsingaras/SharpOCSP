@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
 using System.Xml;
-using System.Reflection;
-using System.Text;
-using System.Xml.Linq;
-using System.Threading.Tasks;
 
 namespace SharpOCSP
 {

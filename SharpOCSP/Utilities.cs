@@ -1,11 +1,10 @@
-﻿using System;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Net;
-using System.Linq;
-
-using Org.BouncyCastle.Asn1;
+﻿using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Ocsp;
+using System;
+using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SharpOCSP
 {

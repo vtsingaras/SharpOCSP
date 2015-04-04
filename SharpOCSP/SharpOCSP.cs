@@ -1,17 +1,12 @@
-﻿using System;
+﻿using log4net;
+using log4netExtensions;
+using Org.BouncyCastle.Ocsp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Security.Permissions;
 using System.Security.Principal;
 using System.Threading;
-using log4net;
-using log4netExtensions;
-using Mono.Unix;
-using Mono.Unix.Native;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Ocsp;
-using Org.BouncyCastle.X509;
 
 namespace SharpOCSP
 {

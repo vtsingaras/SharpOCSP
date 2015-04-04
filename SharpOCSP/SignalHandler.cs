@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading;
-using Mono.Unix;
+﻿using Mono.Unix;
 using Mono.Unix.Native;
+using System;
+using System.Threading;
 
 namespace SharpOCSP
 {

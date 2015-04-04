@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-
-using Org.BouncyCastle;
-using Org.BouncyCastle.Crypto;
+﻿using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Signers;
-using Org.BouncyCastle.X509;
 using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.X509;
+using System;
+using System.IO;
 
 namespace SharpOCSP
 {
