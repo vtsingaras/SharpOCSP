@@ -71,8 +71,22 @@ namespace SharpOCSP
 				case "GET":
 					try{
 						var get_request = http_request.Url.PathAndQuery.Remove (0, 1);
-						get_request = WebUtility.UrlDecode(get_request);
-						ocsp_req = new OcspReq (System.Convert.FromBase64String(get_request));
+						byte[] decoded_ocsp_request;
+						StringBuilder request_sb;
+						//Tolerate ocsp requestors that don't URL Encode the base64 string and/or don't pad the base64 representation
+						try{
+							var urld_get_request = WebUtility.UrlDecode(get_request);
+							request_sb = new StringBuilder(urld_get_request);
+							//append ='s until string is multiple of 4
+							request_sb.Append('=', (4 - (urld_get_request.Length % 4)) % 4);
+							decoded_ocsp_request = System.Convert.FromBase64String(request_sb.ToString());
+						}catch(System.FormatException){
+							request_sb = new StringBuilder(get_request);
+							//append ='s until string is multiple of 4
+							request_sb.Append('=', (4 - (get_request.Length % 4)) % 4);
+							decoded_ocsp_request = System.Convert.FromBase64String(request_sb.ToString());
+						}
+						ocsp_req = new OcspReq (decoded_ocsp_request);
 					}catch{
 						throw new OcspMalformedRequestException();
 					}
