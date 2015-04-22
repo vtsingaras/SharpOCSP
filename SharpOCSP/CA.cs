@@ -28,7 +28,7 @@ namespace SharpOCSP
 			_crlLock.EnterReadLock ();
 			try{
 				result = _crl.GetRevokedCertificate(serial);
-			}catch(Exception e) {
+			}catch(Exception) {
 			}finally{
 				_crlLock.ExitReadLock ();
 			}

@@ -150,7 +150,7 @@ namespace SharpOCSP
 		}
         static void Main(string[] args)
         {
-			Console.WriteLine ("PID for daemon: " + Process.GetCurrentProcess ().Id);
+			Console.WriteLine ("PID of daemon: " + Process.GetCurrentProcess ().Id);
 			if (Environment.OSVersion.Platform == PlatformID.Unix) {
 				signaler = new SignalHandler (OnCrlReload, OnSerialsReload);
 				if (Environment.OSVersion.Platform != PlatformID.MacOSX) {
@@ -176,23 +176,33 @@ namespace SharpOCSP
 					if (Environment.OSVersion.Platform == PlatformID.Unix){
 						//Bail-out on Unix if no group was specified but user was.
 						if (config.getConfigValue("group") == null){
-							log.Error("Group is required on UNIX-like platforms.");
-							Environment.Exit(1);
+							throw new OcspInternalMalfunctionException("Group is required on UNIX-like platforms.");
 						}
+						//drop group privileges
 						String group_name = config.getConfigValue("group");
 						var group = Mono.Unix.Native.Syscall.getgrnam(group_name);
 						if (group == null){
-							log.Error("No such group: " + group_name);
-							Environment.Exit(1);
+							throw new OcspInternalMalfunctionException("No such group: " + group_name);
 						}
-						Mono.Unix.Native.Syscall.setgid(group.gr_gid);
-					}
-					WindowsIdentity new_id = new WindowsIdentity(config.getConfigValue("user"));
-					try{
-						WindowsImpersonationContext new_id_context = new_id.Impersonate();
-					}catch{
-						log.Error("Unable to drop privileges");
-						Environment.Exit(1);
+						if (Mono.Unix.Native.Syscall.setresgid(group.gr_gid, group.gr_gid, group.gr_gid) == -1) {
+							throw new OcspInternalMalfunctionException("Can't drop group privileges!");
+						}
+						//drop user privileges
+						String user_name = config.getConfigValue("user");
+						var passwd = Mono.Unix.Native.Syscall.getpwnam(user_name);
+						if (passwd == null){
+							throw new OcspInternalMalfunctionException("No such user: " + user_name);
+						}
+						if (Mono.Unix.Native.Syscall.setresuid(passwd.pw_uid, passwd.pw_uid, passwd.pw_uid) == -1) {
+							throw new OcspInternalMalfunctionException("Can't drop user privileges.");
+						}
+					}else{
+						WindowsIdentity new_id = new WindowsIdentity(config.getConfigValue("user"));
+						try{
+							WindowsImpersonationContext new_id_context = new_id.Impersonate();
+						}catch{
+							throw new OcspInternalMalfunctionException("Unable to drop privileges!");
+						}
 					}
 				}
 				//Listen for HTTP requests
@@ -200,11 +210,11 @@ namespace SharpOCSP
 				//pause
 				app_exit_event.WaitOne();
 				Environment.Exit(1);
-			}catch (ConfigurationException e){
+			}catch (ConfigurationException e) {
 				log.Error ("Configuration: " + e.Message);
-			}catch (OcspFilesystemException e){
-				log.Error (e.Message);
-			}catch (OcspInternalMalfunctionException e){
+			}catch (OcspFilesystemException e) {
+				log.Error ("Filesystem: " + e.Message);
+			}catch (OcspInternalMalfunctionException e) {
 				log.Error ("The application encountered a serious error: " + e.Message);
 				throw e.InnerException;
 			}finally{
