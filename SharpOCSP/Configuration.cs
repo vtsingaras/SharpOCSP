@@ -109,6 +109,13 @@ namespace SharpOCSP
 			if (group != null && group.InnerText != null && group.InnerText != "") {
 				_config.Add ("group", group.InnerText);
 			}
+			var nextupdate = doc.SelectSingleNode ("//nextupdate");
+			if (nextupdate != null && nextupdate.InnerText != null && nextupdate.InnerText != "") {
+				double dummy_double;
+				if (Double.TryParse(nextupdate.InnerText, out dummy_double)) {
+					_config.Add ("nextupdate", nextupdate.InnerText);
+				}
+			}
         }
     }
 }

@@ -22,16 +22,17 @@ namespace SharpOCSP
 		}
 		private X509ExtensionsGenerator _extensions_generator;
 		private byte[] _nonce = null;
-		private string _algorithm;
+		private String _algorithm;
 		private IToken _token;
 		private BasicOcspRespGenerator _builder;
+		private static Double _nextupdate = Convert.ToDouble(SharpOCSP.config.getConfigValue("nextupdate"));
 		public void AddGoodResponse(CertificateID cert_id)
 		{
-			_builder.AddResponse (cert_id, CertificateStatus.Good, DateTime.UtcNow.AddMinutes (5), null);
+			_builder.AddResponse (cert_id, CertificateStatus.Good, DateTime.UtcNow.AddMinutes(_nextupdate), null);
 		}
 		public void AddUnknownResponse(CertificateID cert_id)
 		{
-			_builder.AddResponse (cert_id, new UnknownStatus (), DateTime.UtcNow.AddMinutes (5), null);
+			_builder.AddResponse (cert_id, new UnknownStatus (), DateTime.UtcNow.AddMinutes (_nextupdate), null);
 		}
 		public void AddRevokedResponse(CertificateID cert_id, X509CrlEntry crl_entry)
 		{
@@ -45,13 +46,13 @@ namespace SharpOCSP
 				reason = (int)CrlReason.unspecified;
 			}
 			CertificateStatus status = new RevokedStatus (crl_entry.RevocationDate, reason);
-			_builder.AddResponse (cert_id, status, DateTime.UtcNow.AddMinutes (5), null);
+			_builder.AddResponse (cert_id, status, DateTime.UtcNow.AddMinutes (_nextupdate), null);
 		}
 		//requires the extended revocation extension to be included in the basic response
 		public void AddExtendedRevocationResponse(CertificateID cert_id)
 		{
 			var status = new RevokedStatus (new DateTime (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc), (int)CrlReason.certificateHold);
-			_builder.AddResponse (cert_id, status, DateTime.UtcNow.AddMinutes (5), null);
+			_builder.AddResponse (cert_id, status, DateTime.UtcNow.AddMinutes (_nextupdate), null);
 			//now add the extended revocation extension
 			var extended_revoke_oid = new DerObjectIdentifier ("1.3.6.1.5.5.7.48.1.9");
 			//don't crash if extension was already added
