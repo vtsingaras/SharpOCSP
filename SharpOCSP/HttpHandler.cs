@@ -52,7 +52,6 @@ namespace SharpOCSP
                                 catch (IOException)
                                 {
                                     SharpOCSP.log.Warn("Remote ednpoint closed the connection.");
-                                    throw;
                                 }
 							}, _listener.GetContext());
 					}
